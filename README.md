@@ -107,6 +107,14 @@ Compare the current vendored header with a newly fetched SDK:
 python3 tools/diff_h.py --new tools/impeller_<sha8>
 ```
 
+Package per-platform SDK tarballs for lazy dependencies:
+
+```bash
+python3 tools/package_sdk.py --out-dir dist
+```
+
+The `Package Impeller SDK` GitHub Actions workflow runs this manually, uploads the tarballs to a GitHub Release, and can update the generated lazy dependency entries in `build.zig.zon`.
+
 ## LICENSE
 
 [MIT](LICENSE)
