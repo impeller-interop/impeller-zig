@@ -85,6 +85,28 @@ Runnable GLFW examples now live in the separate `zig-impeller-examples` reposito
 - `zig build test` runs unit tests
 - `FragmentProgram` is wrapped, but shader packaging is not documented here yet
 
+## Tools
+
+Fetch the latest stable Impeller SDK:
+
+```bash
+python3 tools/fetch_sdk.py
+```
+
+This writes a vendor-like SDK tree to `tools/impeller_<sha8>/`. Use `--channel beta` for the latest beta SDK, or `--sha <engine-sha>` for a specific Flutter engine revision.
+
+Export the current vendored `impeller.h` surface:
+
+```bash
+python3 tools/export_h.py --output ./impeller_h.md
+```
+
+Compare the current vendored header with a newly fetched SDK:
+
+```bash
+python3 tools/diff_h.py --new tools/impeller_<sha8>
+```
+
 ## LICENSE
 
 [MIT](LICENSE)
