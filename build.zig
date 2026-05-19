@@ -26,6 +26,7 @@ pub fn build(b: *std.Build) void {
         addPendingModule(b, options);
         return;
     };
+    addSdkPaths(b, sdk);
     const mod = addModule(b, options, sdk);
 
     addLibraryArtifact(b, mod);
@@ -38,6 +39,12 @@ fn addLibraryArtifact(b: *std.Build, mod: *std.Build.Module) void {
         .root_module = mod,
     });
     b.installArtifact(lib);
+}
+
+fn addSdkPaths(b: *std.Build, sdk: ImpellerSdk) void {
+    b.addNamedLazyPath("impeller_include", sdk.include_path);
+    b.addNamedLazyPath("impeller_lib_dir", sdk.lib_path);
+    b.addNamedLazyPath("impeller_library", sdk.library);
 }
 
 fn addPendingModule(b: *std.Build, options: BuildOptions) void {
