@@ -29,6 +29,10 @@ pub const Error = error{
 };
 
 pub const version = c.IMPELLER_VERSION;
+pub const version_variant = c.IMPELLER_VERSION_VARIANT;
+pub const version_major = c.IMPELLER_VERSION_MAJOR;
+pub const version_minor = c.IMPELLER_VERSION_MINOR;
+pub const version_patch = c.IMPELLER_VERSION_PATCH;
 
 pub const ColorSpace = c.ImpellerColorSpace;
 pub const PixelFormat = c.ImpellerPixelFormat;
@@ -63,6 +67,9 @@ pub const TextDecoration = c.ImpellerTextDecoration;
 pub const Color = c.ImpellerColor;
 pub const Mapping = c.ImpellerMapping;
 pub const TextureDescriptor = c.ImpellerTextureDescriptor;
+pub const Callback = c.ImpellerCallback;
+pub const ProcAddressCallback = c.ImpellerProcAddressCallback;
+pub const VulkanProcAddressCallback = c.ImpellerVulkanProcAddressCallback;
 pub const ImageFilterHandle = c.ImpellerImageFilter;
 pub const TextureHandle = c.ImpellerTexture;
 
@@ -226,6 +233,31 @@ pub fn runtimeVersion() u32 {
     return c.ImpellerGetVersion();
 }
 
+/// Packs Impeller version components into a single version value.
+pub fn makeVersion(variant: u32, major: u32, minor: u32, patch: u32) u32 {
+    return ((variant << 29) | (major << 22) | (minor << 12) | patch);
+}
+
+/// Returns the variant component from a packed Impeller version.
+pub fn versionVariant(value: u32) u32 {
+    return value >> 29;
+}
+
+/// Returns the major component from a packed Impeller version.
+pub fn versionMajor(value: u32) u32 {
+    return (value >> 22) & 0x7f;
+}
+
+/// Returns the minor component from a packed Impeller version.
+pub fn versionMinor(value: u32) u32 {
+    return (value >> 12) & 0x3ff;
+}
+
+/// Returns the patch component from a packed Impeller version.
+pub fn versionPatch(value: u32) u32 {
+    return value & 0xfff;
+}
+
 /// Verifies that the imported header version matches the linked runtime.
 pub fn checkVersion() Error!void {
     if (runtimeVersion() != version) return Error.VersionMismatch;
@@ -250,7 +282,7 @@ pub const Context = struct {
     }
 
     /// Creates an OpenGL ES Impeller context using a GL procedure resolver.
-    pub fn initOpenGLES(callback: c.ImpellerProcAddressCallback, user_data: ?*anyopaque) Error!Context {
+    pub fn initOpenGLES(callback: ProcAddressCallback, user_data: ?*anyopaque) Error!Context {
         try checkVersion();
         const handle = c.ImpellerContextCreateOpenGLESNew(version, callback, user_data) orelse return Error.CreateContextFailed;
         return .{ .handle = handle };

@@ -66,6 +66,32 @@ test "texture descriptor" {
     try std.testing.expectEqual(@as(u32, 12), value.mip_count);
 }
 
+test "version helpers" {
+    const value = impeller.makeVersion(1, 2, 3, 4);
+
+    try std.testing.expectEqual(@as(u32, 1), impeller.versionVariant(value));
+    try std.testing.expectEqual(@as(u32, 2), impeller.versionMajor(value));
+    try std.testing.expectEqual(@as(u32, 3), impeller.versionMinor(value));
+    try std.testing.expectEqual(@as(u32, 4), impeller.versionPatch(value));
+    try std.testing.expectEqual(impeller.version, impeller.makeVersion(
+        impeller.version_variant,
+        impeller.version_major,
+        impeller.version_minor,
+        impeller.version_patch,
+    ));
+}
+
+test "callback aliases" {
+    comptime {
+        const callback: type = impeller.Callback;
+        const proc_address_callback: type = impeller.ProcAddressCallback;
+        const vulkan_proc_address_callback: type = impeller.VulkanProcAddressCallback;
+        _ = callback;
+        _ = proc_address_callback;
+        _ = vulkan_proc_address_callback;
+    }
+}
+
 test "mapping borrows bytes" {
     const bytes = "impeller";
     const value = impeller.mapping(bytes);
