@@ -68,6 +68,8 @@ pub const TextureHandle = c.ImpellerTexture;
 
 pub const color_spaces = struct {
     pub const srgb = c.kImpellerColorSpaceSRGB;
+    pub const extended_srgb = c.kImpellerColorSpaceExtendedSRGB;
+    pub const display_p3 = c.kImpellerColorSpaceDisplayP3;
 };
 
 pub const pixel_formats = struct {
@@ -75,54 +77,137 @@ pub const pixel_formats = struct {
 };
 
 pub const texture_samplings = struct {
-    pub const linear = c.kImpellerTextureSamplingLinear;
     pub const nearest_neighbor = c.kImpellerTextureSamplingNearestNeighbor;
+    pub const linear = c.kImpellerTextureSamplingLinear;
 };
 
 pub const fill_types = struct {
     pub const non_zero = c.kImpellerFillTypeNonZero;
+    pub const odd = c.kImpellerFillTypeOdd;
 };
 
 pub const clip_operations = struct {
+    pub const difference = c.kImpellerClipOperationDifference;
     pub const intersect = c.kImpellerClipOperationIntersect;
 };
 
 pub const blend_modes = struct {
+    pub const clear = c.kImpellerBlendModeClear;
+    pub const source = c.kImpellerBlendModeSource;
+    pub const destination = c.kImpellerBlendModeDestination;
+    pub const source_over = c.kImpellerBlendModeSourceOver;
+    pub const destination_over = c.kImpellerBlendModeDestinationOver;
+    pub const source_in = c.kImpellerBlendModeSourceIn;
+    pub const destination_in = c.kImpellerBlendModeDestinationIn;
+    pub const source_out = c.kImpellerBlendModeSourceOut;
+    pub const destination_out = c.kImpellerBlendModeDestinationOut;
     pub const source_atop = c.kImpellerBlendModeSourceATop;
+    pub const destination_atop = c.kImpellerBlendModeDestinationATop;
+    pub const xor = c.kImpellerBlendModeXor;
+    pub const plus = c.kImpellerBlendModePlus;
+    pub const modulate = c.kImpellerBlendModeModulate;
+    pub const screen = c.kImpellerBlendModeScreen;
+    pub const overlay = c.kImpellerBlendModeOverlay;
+    pub const darken = c.kImpellerBlendModeDarken;
+    pub const lighten = c.kImpellerBlendModeLighten;
+    pub const color_dodge = c.kImpellerBlendModeColorDodge;
+    pub const color_burn = c.kImpellerBlendModeColorBurn;
+    pub const hard_light = c.kImpellerBlendModeHardLight;
+    pub const soft_light = c.kImpellerBlendModeSoftLight;
+    pub const difference = c.kImpellerBlendModeDifference;
+    pub const exclusion = c.kImpellerBlendModeExclusion;
+    pub const multiply = c.kImpellerBlendModeMultiply;
+    pub const hue = c.kImpellerBlendModeHue;
+    pub const saturation = c.kImpellerBlendModeSaturation;
+    pub const color = c.kImpellerBlendModeColor;
+    pub const luminosity = c.kImpellerBlendModeLuminosity;
 };
 
 pub const draw_styles = struct {
+    pub const fill = c.kImpellerDrawStyleFill;
     pub const stroke = c.kImpellerDrawStyleStroke;
+    pub const stroke_and_fill = c.kImpellerDrawStyleStrokeAndFill;
 };
 
 pub const stroke_caps = struct {
+    pub const butt = c.kImpellerStrokeCapButt;
     pub const round = c.kImpellerStrokeCapRound;
+    pub const square = c.kImpellerStrokeCapSquare;
 };
 
 pub const stroke_joins = struct {
+    pub const miter = c.kImpellerStrokeJoinMiter;
     pub const round = c.kImpellerStrokeJoinRound;
+    pub const bevel = c.kImpellerStrokeJoinBevel;
 };
 
 pub const tile_modes = struct {
     pub const clamp = c.kImpellerTileModeClamp;
-    pub const decal = c.kImpellerTileModeDecal;
     pub const repeat = c.kImpellerTileModeRepeat;
+    pub const mirror = c.kImpellerTileModeMirror;
+    pub const decal = c.kImpellerTileModeDecal;
 };
 
 pub const blur_styles = struct {
     pub const normal = c.kImpellerBlurStyleNormal;
+    pub const solid = c.kImpellerBlurStyleSolid;
+    pub const outer = c.kImpellerBlurStyleOuter;
+    pub const inner = c.kImpellerBlurStyleInner;
 };
 
 pub const font_weights = struct {
+    pub const thin = c.kImpellerFontWeight100;
+    pub const extra_light = c.kImpellerFontWeight200;
+    pub const light = c.kImpellerFontWeight300;
+    pub const normal = c.kImpellerFontWeight400;
+    pub const medium = c.kImpellerFontWeight500;
+    pub const semi_bold = c.kImpellerFontWeight600;
     pub const bold = c.kImpellerFontWeight700;
+    pub const extra_bold = c.kImpellerFontWeight800;
+    pub const black = c.kImpellerFontWeight900;
+    pub const w100 = c.kImpellerFontWeight100;
+    pub const w200 = c.kImpellerFontWeight200;
+    pub const w300 = c.kImpellerFontWeight300;
+    pub const w400 = c.kImpellerFontWeight400;
+    pub const w500 = c.kImpellerFontWeight500;
+    pub const w600 = c.kImpellerFontWeight600;
+    pub const w700 = c.kImpellerFontWeight700;
+    pub const w800 = c.kImpellerFontWeight800;
+    pub const w900 = c.kImpellerFontWeight900;
+};
+
+pub const font_styles = struct {
+    pub const normal = c.kImpellerFontStyleNormal;
+    pub const italic = c.kImpellerFontStyleItalic;
 };
 
 pub const text_alignments = struct {
     pub const left = c.kImpellerTextAlignmentLeft;
+    pub const right = c.kImpellerTextAlignmentRight;
+    pub const center = c.kImpellerTextAlignmentCenter;
+    pub const justify = c.kImpellerTextAlignmentJustify;
+    pub const start = c.kImpellerTextAlignmentStart;
+    pub const end = c.kImpellerTextAlignmentEnd;
 };
 
 pub const text_directions = struct {
+    pub const rtl = c.kImpellerTextDirectionRTL;
     pub const ltr = c.kImpellerTextDirectionLTR;
+};
+
+pub const text_decoration_types = struct {
+    pub const none = c.kImpellerTextDecorationTypeNone;
+    pub const underline = c.kImpellerTextDecorationTypeUnderline;
+    pub const overline = c.kImpellerTextDecorationTypeOverline;
+    pub const line_through = c.kImpellerTextDecorationTypeLineThrough;
+};
+
+pub const text_decoration_styles = struct {
+    pub const solid = c.kImpellerTextDecorationStyleSolid;
+    pub const double = c.kImpellerTextDecorationStyleDouble;
+    pub const dotted = c.kImpellerTextDecorationStyleDotted;
+    pub const dashed = c.kImpellerTextDecorationStyleDashed;
+    pub const wavy = c.kImpellerTextDecorationStyleWavy;
 };
 
 /// Creates an sRGB color value for Impeller drawing APIs.
