@@ -300,6 +300,11 @@ pub const Context = struct {
         self.handle = null;
     }
 
+    /// Returns the underlying Impeller context handle.
+    pub fn raw(self: Context) c.ImpellerContext {
+        return self.handle;
+    }
+
     /// Reads Vulkan handles owned by this context.
     pub fn vulkanInfo(self: Context) ?VulkanInfo {
         var info: VulkanInfo = .{};
@@ -856,6 +861,11 @@ pub const PathBuilder = struct {
         self.handle = null;
     }
 
+    /// Returns the underlying Impeller path builder handle.
+    pub fn raw(self: PathBuilder) c.ImpellerPathBuilder {
+        return self.handle;
+    }
+
     /// Moves the current point to the specified location.
     pub fn moveTo(self: PathBuilder, location: Point) void {
         var local_point = location;
@@ -940,6 +950,11 @@ pub const DisplayList = struct {
         c.ImpellerDisplayListRelease(self.handle);
         self.handle = null;
     }
+
+    /// Returns the underlying Impeller display list handle.
+    pub fn raw(self: DisplayList) c.ImpellerDisplayList {
+        return self.handle;
+    }
 };
 
 pub const DisplayListBuilder = struct {
@@ -963,6 +978,11 @@ pub const DisplayListBuilder = struct {
         if (self.handle == null) return;
         c.ImpellerDisplayListBuilderRelease(self.handle);
         self.handle = null;
+    }
+
+    /// Returns the underlying Impeller display list builder handle.
+    pub fn raw(self: DisplayListBuilder) c.ImpellerDisplayListBuilder {
+        return self.handle;
     }
 
     /// Builds an immutable display list and resets the builder.
@@ -1230,6 +1250,11 @@ pub const Surface = struct {
         self.handle = null;
     }
 
+    /// Returns the underlying Impeller surface handle.
+    pub fn raw(self: Surface) c.ImpellerSurface {
+        return self.handle;
+    }
+
     /// Draws a display list onto this surface.
     pub fn draw(self: Surface, display_list: DisplayList) Error!void {
         if (!c.ImpellerSurfaceDrawDisplayList(self.handle, display_list.handle)) return Error.DrawFailed;
@@ -1326,6 +1351,11 @@ pub const VulkanSwapchain = struct {
         self.handle = null;
     }
 
+    /// Returns the underlying Impeller Vulkan swapchain handle.
+    pub fn raw(self: VulkanSwapchain) c.ImpellerVulkanSwapchain {
+        return self.handle;
+    }
+
     /// Acquires the next renderable surface from this swapchain.
     pub fn acquireNextSurface(self: VulkanSwapchain) Error!Surface {
         const handle = c.ImpellerVulkanSwapchainAcquireNextSurfaceNew(self.handle) orelse return Error.AcquireSurfaceFailed;
@@ -1352,6 +1382,11 @@ pub const TypographyContext = struct {
         if (self.handle == null) return;
         c.ImpellerTypographyContextRelease(self.handle);
         self.handle = null;
+    }
+
+    /// Returns the underlying Impeller typography context handle.
+    pub fn raw(self: TypographyContext) c.ImpellerTypographyContext {
+        return self.handle;
     }
 
     /// Registers a font blob from a caller-managed Impeller mapping, optionally overriding its family name.
@@ -1387,6 +1422,11 @@ pub const ParagraphStyle = struct {
         if (self.handle == null) return;
         c.ImpellerParagraphStyleRelease(self.handle);
         self.handle = null;
+    }
+
+    /// Returns the underlying Impeller paragraph style handle.
+    pub fn raw(self: ParagraphStyle) c.ImpellerParagraphStyle {
+        return self.handle;
     }
 
     /// Sets the paint used to fill glyphs.
@@ -1477,6 +1517,11 @@ pub const ParagraphBuilder = struct {
         self.handle = null;
     }
 
+    /// Returns the underlying Impeller paragraph builder handle.
+    pub fn raw(self: ParagraphBuilder) c.ImpellerParagraphBuilder {
+        return self.handle;
+    }
+
     /// Pushes a paragraph style onto the style stack.
     pub fn pushStyle(self: ParagraphBuilder, style: ParagraphStyle) void {
         c.ImpellerParagraphBuilderPushStyle(self.handle, style.handle);
@@ -1512,6 +1557,11 @@ pub const Paragraph = struct {
         if (self.handle == null) return;
         c.ImpellerParagraphRelease(self.handle);
         self.handle = null;
+    }
+
+    /// Returns the underlying Impeller paragraph handle.
+    pub fn raw(self: Paragraph) c.ImpellerParagraph {
+        return self.handle;
     }
 
     /// Returns the layout width used for the paragraph.
@@ -1595,6 +1645,11 @@ pub const LineMetrics = struct {
         self.handle = null;
     }
 
+    /// Returns the underlying Impeller line metrics handle.
+    pub fn raw(self: LineMetrics) c.ImpellerLineMetrics {
+        return self.handle;
+    }
+
     /// Returns the unscaled ascent for the specified line.
     pub fn getUnscaledAscent(self: LineMetrics, line: usize) f64 {
         return c.ImpellerLineMetricsGetUnscaledAscent(self.handle, line);
@@ -1669,6 +1724,11 @@ pub const GlyphInfo = struct {
         if (self.handle == null) return;
         c.ImpellerGlyphInfoRelease(self.handle);
         self.handle = null;
+    }
+
+    /// Returns the underlying Impeller glyph info handle.
+    pub fn raw(self: GlyphInfo) c.ImpellerGlyphInfo {
+        return self.handle;
     }
 
     /// Returns the UTF-16 start index of the grapheme cluster.
