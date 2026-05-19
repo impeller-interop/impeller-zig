@@ -22,7 +22,10 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     };
 
-    const sdk = impellerSdk(b, target.result) orelse return;
+    const sdk = impellerSdk(b, target.result) orelse {
+        addPendingModule(b, options);
+        return;
+    };
     const mod = addModule(b, options, sdk);
 
     addLibraryArtifact(b, mod);
@@ -35,6 +38,14 @@ fn addLibraryArtifact(b: *std.Build, mod: *std.Build.Module) void {
         .root_module = mod,
     });
     b.installArtifact(lib);
+}
+
+fn addPendingModule(b: *std.Build, options: BuildOptions) void {
+    _ = b.addModule("impeller", .{
+        .root_source_file = b.path("src/impeller.zig"),
+        .target = options.target,
+        .optimize = options.optimize,
+    });
 }
 
 fn addModule(b: *std.Build, options: BuildOptions, sdk: ImpellerSdk) *std.Build.Module {
