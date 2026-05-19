@@ -4,43 +4,16 @@
     .fingerprint = 0xe96800ad1f454f10,
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
-        // BEGIN GENERATED IMPELLER SDK DEPS
-        .impeller_sdk_macos_arm64 = .{
-            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-4c525dac/impeller-sdk-macos-arm64.tar.gz",
-            .hash = "impeller_sdk_macos_arm64-0.0.1-OC2y7fYRqQDF1sXfEJzaqmy6dNOYf8oi9YwikSYxbZxI",
-            .lazy = true,
+        .impeller_sdk = .{
+            .url = "git+https://github.com/KercyDing/impeller-sdk?ref=stable#6ded0737aa9ffa5d2897c0b89debcae242bff040",
+            .hash = "impeller_sdk-0.0.1-TZhUmV0jAABC-8UubnunQon9Q-OYvyqW5_d5EjUnF1wo",
         },
-        .impeller_sdk_macos_x64 = .{
-            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-4c525dac/impeller-sdk-macos-x64.tar.gz",
-            .hash = "impeller_sdk_macos_x64-0.0.1-Qx6VKLw5qgDLKYijngdnEmjCrBmu8Yl6iBe-wKaK1cvq",
-            .lazy = true,
-        },
-        .impeller_sdk_linux_arm64 = .{
-            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-4c525dac/impeller-sdk-linux-arm64.tar.gz",
-            .hash = "impeller_sdk_linux_arm64-0.0.1-FxXa4x7EfQDeLPETrPiDOFn4SbZAZrQ4wFp1i3Ce8mPH",
-            .lazy = true,
-        },
-        .impeller_sdk_linux_x64 = .{
-            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-4c525dac/impeller-sdk-linux-x64.tar.gz",
-            .hash = "impeller_sdk_linux_x64-0.0.1-327TimQMhQB1ATFVpxexP1SrzdOHyA3pP6lYTRhu0hqF",
-            .lazy = true,
-        },
-        .impeller_sdk_windows_arm64 = .{
-            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-4c525dac/impeller-sdk-windows-arm64.tar.gz",
-            .hash = "impeller_sdk_windows_arm64-0.0.1-dZsxgCyIZwCtuVtzW-_ATBPQjbRFEKnV7uc-VBfI4AL3",
-            .lazy = true,
-        },
-        .impeller_sdk_windows_x64 = .{
-            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-4c525dac/impeller-sdk-windows-x64.tar.gz",
-            .hash = "impeller_sdk_windows_x64-0.0.1-QN1vuip8aAAr5f8FAWswt8sLScmOBhIqonIsa7E4gGSS",
-            .lazy = true,
-        },
-        // END GENERATED IMPELLER SDK DEPS
     },
     .paths = .{
         "build.zig",
         "build.zig.zon",
         "src",
-        "tests",
+        "README.md",
+        "LICENSE",
     },
 }
