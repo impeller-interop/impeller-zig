@@ -3,11 +3,44 @@
     .version = "0.0.1",
     .fingerprint = 0xe96800ad1f454f10,
     .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        // BEGIN GENERATED IMPELLER SDK DEPS
+        .impeller_sdk_macos_arm64 = .{
+            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-73dc1ccd/impeller-sdk-macos-arm64.tar.gz",
+            .hash = "impeller_sdk_macos_arm64-0.0.1-bJcJpvYRqQDdRl3E7lyCzPv8itRxDo3xCbd_n3bKmAMI",
+            .lazy = true,
+        },
+        .impeller_sdk_macos_x64 = .{
+            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-73dc1ccd/impeller-sdk-macos-x64.tar.gz",
+            .hash = "impeller_sdk_macos_x64-0.0.1-t7Iawrw5qgC6vfWMkLazTEyCV5tVQCYoqjAwCjVBYs-A",
+            .lazy = true,
+        },
+        .impeller_sdk_linux_arm64 = .{
+            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-73dc1ccd/impeller-sdk-linux-arm64.tar.gz",
+            .hash = "impeller_sdk_linux_arm64-0.0.1-4de52B7EfQAUKPzrZdhyN3rub1srtJUQTsLh42qZ1kFp",
+            .lazy = true,
+        },
+        .impeller_sdk_linux_x64 = .{
+            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-73dc1ccd/impeller-sdk-linux-x64.tar.gz",
+            .hash = "impeller_sdk_linux_x64-0.0.1-tEwsXmQMhQAAABlPHLJ3BGy2FvMpASl6Za_O9sLvLAIU",
+            .lazy = true,
+        },
+        .impeller_sdk_windows_arm64 = .{
+            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-73dc1ccd/impeller-sdk-windows-arm64.tar.gz",
+            .hash = "impeller_sdk_windows_arm64-0.0.1-adEZlSyIZwA4T_buxVcYkSxLhN6Jexh4Z9U5lD8-Snun",
+            .lazy = true,
+        },
+        .impeller_sdk_windows_x64 = .{
+            .url = "https://github.com/KercyDing/zig-impeller/releases/download/sdk-73dc1ccd/impeller-sdk-windows-x64.tar.gz",
+            .hash = "impeller_sdk_windows_x64-0.0.1-1cGb8Cp8aAC88mAe6UBGftTaa_mRUzDbJG6uIRIJKUbM",
+            .lazy = true,
+        },
+        // END GENERATED IMPELLER SDK DEPS
+    },
     .paths = .{
         "build.zig",
         "build.zig.zon",
         "src",
         "tests",
-        "vendor",
     },
 }

@@ -22,7 +22,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     };
 
-    const sdk = resolveImpellerSdk(b, target.result);
+    const sdk = impellerSdk(b, target.result) orelse return;
     const mod = addModule(b, options, sdk);
 
     addLibraryArtifact(b, mod);
@@ -105,25 +105,48 @@ fn configureImpellerRuntime(run: *std.Build.Step.Run, sdk: ImpellerSdk) void {
     run.addPathDir(sdk.lib_path_string);
 }
 
-fn resolveImpellerSdk(b: *std.Build, target: std.Target) ImpellerSdk {
-    const include_path = b.path("vendor/impeller/include");
-    const os_dir = impellerLibOsDir(target) orelse @panic("unsupported Impeller SDK target");
-    const arch_dir = impellerLibArchDir(target) orelse @panic("unsupported Impeller SDK target architecture");
-    const lib_path = b.fmt("vendor/impeller/lib/{s}/{s}", .{ os_dir, arch_dir });
+fn impellerSdk(b: *std.Build, target: std.Target) ?ImpellerSdk {
+    const dep_name = sdkDepName(target) orelse @panic("unsupported Impeller SDK target");
+    const dep = b.lazyDependency(dep_name, .{}) orelse return null;
+    const include_path = dep.path("include");
+    const os_dir = libOsDir(target);
+    const arch_dir = libArchDir(target);
+    const lib_path = dep.builder.fmt("lib/{s}/{s}", .{ os_dir, arch_dir });
     return .{
-        .header = b.path("vendor/impeller/include/impeller.h"),
+        .header = dep.path("include/impeller.h"),
         .include_path = include_path,
-        .lib_path = b.path(lib_path),
-        .lib_path_string = b.pathFromRoot(lib_path),
-        .library = b.path(b.fmt("{s}/{s}", .{ lib_path, impellerLibraryName(target) })),
+        .lib_path = dep.path(lib_path),
+        .lib_path_string = dep.builder.pathFromRoot(lib_path),
+        .library = dep.path(dep.builder.fmt("{s}/{s}", .{ lib_path, libName(target) })),
         .import_library = if (target.os.tag == .windows)
-            b.path(b.fmt("{s}/{s}", .{ lib_path, impellerImportLibraryName() }))
+            dep.path(dep.builder.fmt("{s}/{s}", .{ lib_path, importLibName }))
         else
             null,
     };
 }
 
-fn impellerLibraryName(target: std.Target) []const u8 {
+fn sdkDepName(target: std.Target) ?[]const u8 {
+    return switch (target.os.tag) {
+        .macos => switch (target.cpu.arch) {
+            .aarch64 => "impeller_sdk_macos_arm64",
+            .x86_64 => "impeller_sdk_macos_x64",
+            else => null,
+        },
+        .linux => switch (target.cpu.arch) {
+            .aarch64 => "impeller_sdk_linux_arm64",
+            .x86_64 => "impeller_sdk_linux_x64",
+            else => null,
+        },
+        .windows => switch (target.cpu.arch) {
+            .aarch64 => "impeller_sdk_windows_arm64",
+            .x86_64 => "impeller_sdk_windows_x64",
+            else => null,
+        },
+        else => null,
+    };
+}
+
+fn libName(target: std.Target) []const u8 {
     return switch (target.os.tag) {
         .macos => "libimpeller.dylib",
         .windows => "impeller.dll",
@@ -131,23 +154,21 @@ fn impellerLibraryName(target: std.Target) []const u8 {
     };
 }
 
-fn impellerImportLibraryName() []const u8 {
-    return "impeller.dll.lib";
-}
+const importLibName = "impeller.dll.lib";
 
-fn impellerLibOsDir(target: std.Target) ?[]const u8 {
+fn libOsDir(target: std.Target) []const u8 {
     return switch (target.os.tag) {
         .macos => "macos",
         .linux => "linux",
         .windows => "windows",
-        else => null,
+        else => @panic("unsupported Impeller SDK target"),
     };
 }
 
-fn impellerLibArchDir(target: std.Target) ?[]const u8 {
+fn libArchDir(target: std.Target) []const u8 {
     return switch (target.cpu.arch) {
         .aarch64 => "arm64",
         .x86_64 => "x64",
-        else => null,
+        else => @panic("unsupported Impeller SDK target architecture"),
     };
 }
