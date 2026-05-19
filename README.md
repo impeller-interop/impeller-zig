@@ -2,6 +2,8 @@
 
 Zig bindings for Impeller's standalone `impeller.h` API.
 
+Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/KercyDing/impeller-sdk).
+
 <p align="left">
   <img src="https://github.com/user-attachments/assets/938615ee-55aa-4a76-a106-c778151ede53" width="400">
 </p>
@@ -42,6 +44,7 @@ const exe = b.addExecutable(.{
     .name = "app",
     .root_module = exe_mod,
 });
+exe.root_module.linkLibrary(impeller_dep.artifact("impeller"));
 // ...
 ```
 
@@ -85,27 +88,37 @@ Runnable GLFW examples now live in the separate `zig-impeller-examples` reposito
 - `zig build test` runs unit tests
 - `FragmentProgram` is wrapped, but shader packaging is not documented here yet
 
-## Tools
+## Developer Tools
 
-Fetch the latest stable Impeller SDK:
-
-```bash
-python3 tools/fetch_sdk.py
-```
-
-This writes a vendor-like SDK tree to `tools/impeller_<sha8>/`. Use `--channel beta` for the latest beta SDK, or `--sha <engine-sha>` for a specific Flutter engine revision.
-
-Export the current vendored `impeller.h` surface:
+Fetch the current pinned header:
 
 ```bash
-python3 tools/export_h.py --output ./impeller_h.md
+python3 tools/fetch_h.py --current
 ```
 
-Compare the current vendored header with a newly fetched SDK:
+This updates `tools/impeller.h`, which is committed alongside `build.zig.zon`.
+
+Fetch the latest stable header for comparison:
 
 ```bash
-python3 tools/diff_h.py --new tools/impeller_<sha8>
+python3 tools/fetch_h.py
 ```
+
+Use `--sha <engine-sha>` to fetch a specific Flutter engine header into `tools/impeller_<sha8>.h`.
+
+Export the current SDK header surface:
+
+```bash
+python3 tools/export_h.py
+```
+
+Compare the current SDK header with another SDK:
+
+```bash
+python3 tools/diff_h.py --new tools/impeller_<sha8>.h
+```
+
+By default `diff_h.py` compares against `tools/impeller.h`. Use `--old /path/to/old/impeller.h` to compare against a specific header.
 
 ## LICENSE
 

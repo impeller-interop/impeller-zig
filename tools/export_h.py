@@ -4,13 +4,13 @@
 from __future__ import annotations
 
 import argparse
-import json
 import re
 from pathlib import Path
 from typing import Any
 
 
-DEFAULT_HEADER = Path("vendor/impeller/include/impeller.h")
+TOOLS_DIR = Path(__file__).resolve().parent
+DEFAULT_HEADER = TOOLS_DIR / "impeller.h"
 ATTRIBUTE_MACROS = {
     "IMPELLER_EXPORT",
     "IMPELLER_NODISCARD",
@@ -297,34 +297,16 @@ def write_markdown(data: dict[str, Any]) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--header",
+        "--file",
         type=Path,
         default=DEFAULT_HEADER,
         help=f"Path to impeller.h. Defaults to {DEFAULT_HEADER}.",
     )
-    parser.add_argument(
-        "--format",
-        choices=("markdown", "json"),
-        default="markdown",
-        help="Output format.",
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        help="Optional output path. Prints to stdout when omitted.",
-    )
     args = parser.parse_args()
 
-    data = export_header(args.header)
-    if args.format == "json":
-        output = json.dumps(data, indent=2)
-    else:
-        output = write_markdown(data)
-
-    if args.output:
-        args.output.write_text(output + "\n", encoding="utf-8")
-    else:
-        print(output)
+    output_path = TOOLS_DIR / f"{args.file.stem}.export.md"
+    output_path.write_text(write_markdown(export_header(args.file)) + "\n", encoding="utf-8")
+    print(f"Wrote {output_path}")
 
 
 if __name__ == "__main__":

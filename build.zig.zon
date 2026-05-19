@@ -3,11 +3,17 @@
     .version = "0.0.1",
     .fingerprint = 0xe96800ad1f454f10,
     .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .impeller_sdk = .{
+            .url = "git+https://github.com/KercyDing/impeller-sdk?ref=stable#6ded0737aa9ffa5d2897c0b89debcae242bff040",
+            .hash = "impeller_sdk-0.0.1-TZhUmV0jAABC-8UubnunQon9Q-OYvyqW5_d5EjUnF1wo",
+        },
+    },
     .paths = .{
         "build.zig",
         "build.zig.zon",
         "src",
-        "tests",
-        "vendor",
+        "README.md",
+        "LICENSE",
     },
 }
