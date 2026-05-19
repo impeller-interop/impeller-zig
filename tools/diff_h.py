@@ -11,7 +11,7 @@ from typing import Any
 import export_h
 
 
-DEFAULT_OLD_HEADER = Path("vendor/impeller/include/impeller.h")
+DEFAULT_OLD_HEADER = Path(__file__).resolve().parent / "impeller.h"
 
 
 def resolve_header(path: Path) -> Path:
@@ -206,7 +206,12 @@ def main() -> int:
         default=DEFAULT_OLD_HEADER,
         help=f"Old SDK directory or impeller.h path. Defaults to {DEFAULT_OLD_HEADER}.",
     )
-    parser.add_argument("--new", type=Path, required=True, help="New SDK directory or impeller.h path.")
+    parser.add_argument(
+        "--new",
+        type=Path,
+        required=True,
+        help="New SDK directory or impeller.h path.",
+    )
     args = parser.parse_args()
 
     old_header = resolve_header(args.old)

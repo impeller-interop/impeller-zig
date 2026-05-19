@@ -2,4 +2,3 @@ zig-out
 zig-pkg
 .zig-cache
 dist
-impeller_h.md

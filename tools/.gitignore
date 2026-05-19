@@ -1,2 +1,3 @@
-impeller_*/
+impeller_*.h
+*.export.md
 __pycache__
