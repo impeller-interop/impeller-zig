@@ -5,8 +5,8 @@
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
         .impeller_sdk = .{
-            .url = "git+https://github.com/KercyDing/impeller-sdk?ref=stable#6ded0737aa9ffa5d2897c0b89debcae242bff040",
-            .hash = "impeller_sdk-0.0.1-TZhUmV0jAABC-8UubnunQon9Q-OYvyqW5_d5EjUnF1wo",
+            .url = "git+https://github.com/impeller-interop/impeller-sdk?ref=stable#21dce84c0fe6558a5027783f4a38c7418d987825",
+            .hash = "impeller_sdk-0.0.1-TZhUmZUjAAD__f7pYbD7A2bEtRp1FrH3a0YoQr4-6p_q",
         },
     },
     .paths = .{

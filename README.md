@@ -1,14 +1,14 @@
-# zig-impeller
+# impeller-zig
 
 Zig bindings for Impeller's standalone `impeller.h` API.
 
-Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/KercyDing/impeller-sdk).
+Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/impeller-interop/impeller-sdk).
 
 <p align="left">
   <img src="https://github.com/user-attachments/assets/938615ee-55aa-4a76-a106-c778151ede53" width="400">
 </p>
 
-> Examples [here](https://github.com/KercyDing/zig-impeller-examples).
+> Examples [here](https://github.com/impeller-interop/impeller-zig-examples).
 
 ## Features
 
@@ -20,7 +20,7 @@ Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/Ker
 ## Install
 
 ```bash
-zig fetch --save git+https://github.com/KercyDing/zig-impeller#main
+zig fetch --save git+https://github.com/impeller-interop/impeller-zig#main
 ```
 
 Add the dependency in `build.zig`:
@@ -80,7 +80,7 @@ try surface.present();
 
 ## Examples
 
-Runnable GLFW examples now live in the separate `zig-impeller-examples` repository so this package stays a pure library dependency with no GLFW requirement.
+Runnable examples now live in the separate `impeller-zig-examples` repository so this package stays a pure library dependency with no windowing requirement.
 
 ## Status
 
