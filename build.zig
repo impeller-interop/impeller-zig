@@ -89,12 +89,9 @@ fn addTests(b: *std.Build, options: BuildOptions, sdk: ImpellerSdk, mod: *std.Bu
             .{ .name = "impeller", .module = mod },
         },
     });
-    linkSdk(test_mod, sdk, options.target.result);
 
     const tests = b.addTest(.{
         .root_module = test_mod,
-        .use_llvm = true,
-        .use_lld = true,
     });
 
     const run_tests = b.addRunArtifact(tests);
