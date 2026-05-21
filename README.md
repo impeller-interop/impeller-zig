@@ -5,7 +5,8 @@ Zig bindings for Impeller's standalone `impeller.h` API.
 Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/impeller-interop/impeller-sdk).
 
 <p align="left">
-  <img src="https://github.com/user-attachments/assets/938615ee-55aa-4a76-a106-c778151ede53" width="400">
+  <img src="https://github.com/user-attachments/assets/938615ee-55aa-4a76-a106-c778151ede53" height="300">
+  <img src="https://github.com/user-attachments/assets/07dd8543-4f0a-4dc1-ab9f-76c4e3a9a3ad" height="300"/>
 </p>
 
 > Examples [here](https://github.com/impeller-interop/impeller-zig-examples).
