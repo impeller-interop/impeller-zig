@@ -94,9 +94,33 @@ test "callback aliases" {
 
 test "mapping borrows bytes" {
     const bytes = "impeller";
-    const value = impeller.mapping(bytes);
+    const mapping = impeller.Mapping.borrowed(bytes);
 
-    try std.testing.expectEqual(bytes.ptr, value.data);
-    try std.testing.expectEqual(@as(u64, bytes.len), value.length);
-    try std.testing.expectEqual(@as(@TypeOf(value.on_release), null), value.on_release);
+    try std.testing.expectEqual(bytes.ptr, mapping.value.data);
+    try std.testing.expectEqual(@as(u64, bytes.len), mapping.value.length);
+    try std.testing.expectEqual(@as(@TypeOf(mapping.value.on_release), null), mapping.value.on_release);
+    try std.testing.expectEqual(@as(?*anyopaque, null), mapping.release_user_data);
+}
+
+test "mapping release state" {
+    const Release = struct {
+        fn callback(_: ?*anyopaque) callconv(.c) void {}
+    };
+    const bytes = "impeller";
+    var user_data: u8 = 0;
+    const mapping = impeller.Mapping.withRelease(bytes, Release.callback, &user_data);
+
+    try std.testing.expectEqual(bytes.ptr, mapping.value.data);
+    try std.testing.expectEqual(@as(impeller.Callback, Release.callback), mapping.value.on_release.?);
+    try std.testing.expectEqual(@as(?*anyopaque, &user_data), mapping.release_user_data);
+}
+
+test "paint clone" {
+    var paint = try impeller.Paint.init();
+    defer paint.deinit();
+
+    var cloned = paint.clone();
+    defer cloned.deinit();
+
+    try std.testing.expectEqual(paint.raw(), cloned.raw());
 }

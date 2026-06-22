@@ -83,6 +83,18 @@ try surface.present();
 
 Runnable examples now live in the separate `impeller-zig-examples` repository so this package stays a pure library dependency with no windowing requirement.
 
+## Resource ownership
+
+Handle wrappers are move-only by convention. Plain assignment copies a handle without retaining it; use `clone()` when a second owner is required, and call `deinit()` exactly once for each owner.
+
+`Mapping.borrowed()` never takes ownership of its bytes. The caller must satisfy the lifetime required by the receiving API. `Mapping.withRelease()` forwards both the release callback and its user-data baton to Impeller; callbacks may run on background threads.
+
+Byte-oriented APIs name their ownership behavior explicitly:
+
+- `FragmentProgram.initBorrowed()` borrows compiled shader data.
+- `Texture.initWithBytesCopy()` allows Impeller to copy pixel data when asynchronous upload requires it.
+- `TypographyContext.registerFontBorrowed()` requires font data to remain valid for all font use; process-lifetime data such as `@embedFile` is recommended.
+
 ## Status
 
 - All of `impeller.h` is wrapped

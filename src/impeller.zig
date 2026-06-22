@@ -65,7 +65,37 @@ pub const VulkanSettings = c.ImpellerContextVulkanSettings;
 pub const TextDecoration = c.ImpellerTextDecoration;
 
 pub const Color = c.ImpellerColor;
-pub const Mapping = c.ImpellerMapping;
+pub const Mapping = struct {
+    value: c.ImpellerMapping,
+    release_user_data: ?*anyopaque = null,
+
+    /// Borrows bytes using the lifetime required by the receiving Impeller API.
+    pub fn borrowed(bytes: []const u8) Mapping {
+        return .{
+            .value = .{
+                .data = bytes.ptr,
+                .length = bytes.len,
+                .on_release = null,
+            },
+        };
+    }
+
+    /// Creates a callback-backed mapping; the callback may run on any thread.
+    pub fn withRelease(
+        bytes: []const u8,
+        on_release: Callback,
+        release_user_data: ?*anyopaque,
+    ) Mapping {
+        return .{
+            .value = .{
+                .data = bytes.ptr,
+                .length = bytes.len,
+                .on_release = on_release,
+            },
+            .release_user_data = release_user_data,
+        };
+    }
+};
 pub const TextureDescriptor = c.ImpellerTextureDescriptor;
 pub const Callback = c.ImpellerCallback;
 pub const ProcAddressCallback = c.ImpellerProcAddressCallback;
@@ -288,9 +318,10 @@ pub const Context = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this context reference.
-    pub fn retain(self: Context) void {
+    /// Returns a retained context owner that must be deinitialized independently.
+    pub fn clone(self: Context) Context {
         c.ImpellerContextRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this context reference.
@@ -322,9 +353,10 @@ pub const Paint = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this paint reference.
-    pub fn retain(self: Paint) void {
+    /// Returns a retained paint owner that must be deinitialized independently.
+    pub fn clone(self: Paint) Paint {
         c.ImpellerPaintRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this paint reference.
@@ -413,9 +445,10 @@ pub const ColorFilter = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this color filter reference.
-    pub fn retain(self: ColorFilter) void {
+    /// Returns a retained color filter owner that must be deinitialized independently.
+    pub fn clone(self: ColorFilter) ColorFilter {
         c.ImpellerColorFilterRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this color filter reference.
@@ -597,9 +630,10 @@ pub const ColorSource = struct {
         );
     }
 
-    /// Retains this color source reference.
-    pub fn retain(self: ColorSource) void {
+    /// Returns a retained color source owner that must be deinitialized independently.
+    pub fn clone(self: ColorSource) ColorSource {
         c.ImpellerColorSourceRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this color source reference.
@@ -618,21 +652,27 @@ pub const ColorSource = struct {
 pub const FragmentProgram = struct {
     handle: c.ImpellerFragmentProgram,
 
-    /// Creates a fragment program from a caller-managed Impeller mapping.
-    pub fn init(data: Mapping) Error!FragmentProgram {
-        var local_data = data;
-        const handle = c.ImpellerFragmentProgramNew(&local_data, null) orelse return Error.CreateFragmentProgramFailed;
+    /// Creates a fragment program from a caller-managed mapping.
+    /// The release callback may run on any thread.
+    pub fn initMapping(data: Mapping) Error!FragmentProgram {
+        var local_data = data.value;
+        const handle = c.ImpellerFragmentProgramNew(
+            &local_data,
+            data.release_user_data,
+        ) orelse return Error.CreateFragmentProgramFailed;
         return .{ .handle = handle };
     }
 
-    /// Creates a fragment program from borrowed impellerc-compiled bytes.
-    pub fn initWithBytes(data: []const u8) Error!FragmentProgram {
-        return init(mapping(data));
+    /// Creates a fragment program borrowing impellerc-compiled bytes.
+    /// The bytes must outlive all Impeller use of the program.
+    pub fn initBorrowed(data: []const u8) Error!FragmentProgram {
+        return initMapping(Mapping.borrowed(data));
     }
 
-    /// Retains this fragment program reference.
-    pub fn retain(self: FragmentProgram) void {
+    /// Returns a retained fragment program owner that must be deinitialized independently.
+    pub fn clone(self: FragmentProgram) FragmentProgram {
         c.ImpellerFragmentProgramRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this fragment program reference.
@@ -721,9 +761,10 @@ pub const ImageFilter = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this image filter reference.
-    pub fn retain(self: ImageFilter) void {
+    /// Returns a retained image filter owner that must be deinitialized independently.
+    pub fn clone(self: ImageFilter) ImageFilter {
         c.ImpellerImageFilterRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this image filter reference.
@@ -742,17 +783,24 @@ pub const ImageFilter = struct {
 pub const Texture = struct {
     handle: c.ImpellerTexture,
 
-    /// Creates a texture from a caller-managed Impeller mapping.
-    pub fn initWithContents(context: Context, descriptor: TextureDescriptor, contents: Mapping) Error!Texture {
+    /// Creates a texture from a caller-managed mapping.
+    /// The release callback may run on a background thread.
+    pub fn initWithMapping(context: Context, descriptor: TextureDescriptor, contents: Mapping) Error!Texture {
         var local_descriptor = descriptor;
-        var local_contents = contents;
-        const handle = c.ImpellerTextureCreateWithContentsNew(context.handle, &local_descriptor, &local_contents, null) orelse return Error.CreateTextureFailed;
+        var local_contents = contents.value;
+        const handle = c.ImpellerTextureCreateWithContentsNew(
+            context.handle,
+            &local_descriptor,
+            &local_contents,
+            contents.release_user_data,
+        ) orelse return Error.CreateTextureFailed;
         return .{ .handle = handle };
     }
 
-    /// Creates a texture from tightly packed borrowed pixel bytes.
-    pub fn initWithBytes(context: Context, descriptor: TextureDescriptor, bytes: []const u8) Error!Texture {
-        return initWithContents(context, descriptor, mapping(bytes));
+    /// Creates a texture from tightly packed bytes, copying when asynchronous upload requires it.
+    /// Compressed image formats are unsupported.
+    pub fn initWithBytesCopy(context: Context, descriptor: TextureDescriptor, bytes: []const u8) Error!Texture {
+        return initWithMapping(context, descriptor, Mapping.borrowed(bytes));
     }
 
     /// Adopts an existing OpenGL texture handle.
@@ -762,9 +810,10 @@ pub const Texture = struct {
         return .{ .handle = texture };
     }
 
-    /// Retains this texture reference.
-    pub fn retain(self: Texture) void {
+    /// Returns a retained texture owner that must be deinitialized independently.
+    pub fn clone(self: Texture) Texture {
         c.ImpellerTextureRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this texture reference.
@@ -794,9 +843,10 @@ pub const MaskFilter = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this mask filter reference.
-    pub fn retain(self: MaskFilter) void {
+    /// Returns a retained mask filter owner that must be deinitialized independently.
+    pub fn clone(self: MaskFilter) MaskFilter {
         c.ImpellerMaskFilterRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this mask filter reference.
@@ -815,9 +865,10 @@ pub const MaskFilter = struct {
 pub const Path = struct {
     handle: c.ImpellerPath,
 
-    /// Retains this path reference.
-    pub fn retain(self: Path) void {
+    /// Returns a retained path owner that must be deinitialized independently.
+    pub fn clone(self: Path) Path {
         c.ImpellerPathRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this path reference.
@@ -849,9 +900,10 @@ pub const PathBuilder = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this path builder reference.
-    pub fn retain(self: PathBuilder) void {
+    /// Returns a retained path builder owner that must be deinitialized independently.
+    pub fn clone(self: PathBuilder) PathBuilder {
         c.ImpellerPathBuilderRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this path builder reference.
@@ -939,9 +991,10 @@ pub const PathBuilder = struct {
 pub const DisplayList = struct {
     handle: c.ImpellerDisplayList,
 
-    /// Retains this display list reference.
-    pub fn retain(self: DisplayList) void {
+    /// Returns a retained display list owner that must be deinitialized independently.
+    pub fn clone(self: DisplayList) DisplayList {
         c.ImpellerDisplayListRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this display list reference.
@@ -968,9 +1021,10 @@ pub const DisplayListBuilder = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this display list builder reference.
-    pub fn retain(self: DisplayListBuilder) void {
+    /// Returns a retained display list builder owner that must be deinitialized independently.
+    pub fn clone(self: DisplayListBuilder) DisplayListBuilder {
         c.ImpellerDisplayListBuilderRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this display list builder reference.
@@ -1238,9 +1292,10 @@ pub const Surface = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this surface reference.
-    pub fn retain(self: Surface) void {
+    /// Returns a retained surface owner that must be deinitialized independently.
+    pub fn clone(self: Surface) Surface {
         c.ImpellerSurfaceRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this surface reference.
@@ -1313,15 +1368,6 @@ pub fn textureDescriptor(pixel_format: PixelFormat, size_value: ISize, mip_count
     };
 }
 
-/// Creates a byte mapping that borrows caller-owned memory.
-pub fn mapping(bytes: []const u8) Mapping {
-    return .{
-        .data = bytes.ptr,
-        .length = bytes.len,
-        .on_release = null,
-    };
-}
-
 fn textureHandlesFromSlice(textures: []const Texture) ![]TextureHandle {
     const handles = try std.heap.page_allocator.alloc(TextureHandle, textures.len);
     for (textures, 0..) |texture, index| {
@@ -1339,9 +1385,10 @@ pub const VulkanSwapchain = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this Vulkan swapchain reference.
-    pub fn retain(self: VulkanSwapchain) void {
+    /// Returns a retained Vulkan swapchain owner that must be deinitialized independently.
+    pub fn clone(self: VulkanSwapchain) VulkanSwapchain {
         c.ImpellerVulkanSwapchainRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this Vulkan swapchain reference.
@@ -1372,9 +1419,10 @@ pub const TypographyContext = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this typography context reference.
-    pub fn retain(self: TypographyContext) void {
+    /// Returns a retained typography context owner that must be deinitialized independently.
+    pub fn clone(self: TypographyContext) TypographyContext {
         c.ImpellerTypographyContextRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this typography context reference.
@@ -1389,17 +1437,23 @@ pub const TypographyContext = struct {
         return self.handle;
     }
 
-    /// Registers a font blob from a caller-managed Impeller mapping, optionally overriding its family name.
-    pub fn registerFont(self: TypographyContext, contents: Mapping, family_name_alias: ?[*:0]const u8) Error!void {
-        var local_contents = contents;
-        if (!c.ImpellerTypographyContextRegisterFont(self.handle, &local_contents, null, family_name_alias)) {
+    /// Registers a font from a caller-managed mapping.
+    /// Its release callback may run after context destruction.
+    pub fn registerFontMapping(self: TypographyContext, contents: Mapping, family_name_alias: ?[*:0]const u8) Error!void {
+        var local_contents = contents.value;
+        if (!c.ImpellerTypographyContextRegisterFont(
+            self.handle,
+            &local_contents,
+            contents.release_user_data,
+            family_name_alias,
+        )) {
             return Error.RegisterFontFailed;
         }
     }
 
-    /// Registers a font blob from borrowed bytes, optionally overriding its family name.
-    pub fn registerFontBytes(self: TypographyContext, bytes: []const u8, family_name_alias: ?[*:0]const u8) Error!void {
-        return self.registerFont(mapping(bytes), family_name_alias);
+    /// Registers a font borrowing bytes that must remain valid for all font use.
+    pub fn registerFontBorrowed(self: TypographyContext, bytes: []const u8, family_name_alias: ?[*:0]const u8) Error!void {
+        return self.registerFontMapping(Mapping.borrowed(bytes), family_name_alias);
     }
 };
 
@@ -1412,9 +1466,10 @@ pub const ParagraphStyle = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this paragraph style reference.
-    pub fn retain(self: ParagraphStyle) void {
+    /// Returns a retained paragraph style owner that must be deinitialized independently.
+    pub fn clone(self: ParagraphStyle) ParagraphStyle {
         c.ImpellerParagraphStyleRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this paragraph style reference.
@@ -1505,9 +1560,10 @@ pub const ParagraphBuilder = struct {
         return .{ .handle = handle };
     }
 
-    /// Retains this paragraph builder reference.
-    pub fn retain(self: ParagraphBuilder) void {
+    /// Returns a retained paragraph builder owner that must be deinitialized independently.
+    pub fn clone(self: ParagraphBuilder) ParagraphBuilder {
         c.ImpellerParagraphBuilderRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this paragraph builder reference.
@@ -1547,9 +1603,10 @@ pub const ParagraphBuilder = struct {
 pub const Paragraph = struct {
     handle: c.ImpellerParagraph,
 
-    /// Retains this paragraph reference.
-    pub fn retain(self: Paragraph) void {
+    /// Returns a retained paragraph owner that must be deinitialized independently.
+    pub fn clone(self: Paragraph) Paragraph {
         c.ImpellerParagraphRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this paragraph reference.
@@ -1633,9 +1690,10 @@ pub const Paragraph = struct {
 pub const LineMetrics = struct {
     handle: c.ImpellerLineMetrics,
 
-    /// Retains this line metrics reference.
-    pub fn retain(self: LineMetrics) void {
+    /// Returns a retained line metrics owner that must be deinitialized independently.
+    pub fn clone(self: LineMetrics) LineMetrics {
         c.ImpellerLineMetricsRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this line metrics reference.
@@ -1714,9 +1772,10 @@ pub const LineMetrics = struct {
 pub const GlyphInfo = struct {
     handle: c.ImpellerGlyphInfo,
 
-    /// Retains this glyph info reference.
-    pub fn retain(self: GlyphInfo) void {
+    /// Returns a retained glyph info owner that must be deinitialized independently.
+    pub fn clone(self: GlyphInfo) GlyphInfo {
         c.ImpellerGlyphInfoRetain(self.handle);
+        return .{ .handle = self.handle };
     }
 
     /// Releases this glyph info reference.
