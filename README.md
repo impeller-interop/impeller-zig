@@ -28,7 +28,7 @@ Add the dependency in `build.zig`:
 
 ```zig
 // ...
-const impeller_dep = b.dependency("zig_impeller", .{
+const impeller_dep = b.dependency("impeller_zig", .{
     .target = target,
     .optimize = optimize,
 });
