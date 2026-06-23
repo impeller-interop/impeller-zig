@@ -28,6 +28,8 @@ Add the dependency in `build.zig`:
 
 ```zig
 // ...
+const impeller_pkg = @import("impeller_zig");
+
 const impeller_dep = b.dependency("impeller_zig", .{
     .target = target,
     .optimize = optimize,
@@ -45,7 +47,13 @@ const exe = b.addExecutable(.{
     .name = "app",
     .root_module = exe_mod,
 });
-exe.root_module.linkLibrary(impeller_dep.artifact("impeller"));
+
+// Link libimpeller and copy it beside the executable.
+impeller_pkg.linkRuntime(exe, impeller_dep);
+b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
+    .compile_step = exe,
+    .dependency = impeller_dep,
+}));
 // ...
 ```
 
@@ -54,6 +62,10 @@ Then import it:
 ```zig
 const impeller = @import("impeller");
 ```
+
+The runtime link step is explicit so projects that only import the package without using Impeller do not load `libimpeller`.
+
+For custom runtime install layouts and rpath setup, see [BUILD.md](docs/BUILD.md).
 
 ## Minimal drawing
 
