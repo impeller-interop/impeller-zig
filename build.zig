@@ -113,11 +113,11 @@ fn addRawModule(b: *std.Build, options: BuildOptions, sdk: ImpellerSdk) *std.Bui
 
 fn linkSdk(mod: *std.Build.Module, sdk: ImpellerSdk, target: std.Target) void {
     mod.addIncludePath(sdk.include_path);
-    mod.addRPath(sdk.lib_path);
     if (target.os.tag == .windows) {
         mod.addObjectFile(sdk.import_library.?);
     } else {
-        mod.addObjectFile(sdk.library);
+        mod.addLibraryPath(sdk.lib_path);
+        mod.linkSystemLibrary("impeller", .{});
     }
 }
 
