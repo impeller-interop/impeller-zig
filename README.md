@@ -85,13 +85,7 @@ Runnable examples now live in the separate `impeller-zig-examples` repository so
 
 ## API notes
 
-See [docs/API.md](docs/API.md) for ownership, mapping, and lifetime notes.
-
-## Status
-
-- All of `impeller.h` is wrapped
-- `zig build test` runs unit tests
-- `FragmentProgram` is wrapped, but shader packaging is not documented here yet
+See [API.md](docs/API.md) for the API guide.
 
 ## Developer Tools
 
