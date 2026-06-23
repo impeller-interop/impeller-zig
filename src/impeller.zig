@@ -81,7 +81,8 @@ pub const Mapping = struct {
         };
     }
 
-    /// Creates a callback-backed mapping; the callback may run on any thread.
+    /// Creates a low-level callback-backed mapping.
+    /// Most callers should prefer borrowed mappings or OwnedMapping.copy().
     pub fn withRelease(
         bytes: []const u8,
         on_release: Callback,
@@ -134,7 +135,7 @@ pub const OwnedMapping = struct {
         self.mapping = Mapping.borrowed("");
     }
 
-    /// Transfers cleanup responsibility to Impeller after a successful API call.
+    /// Transfers cleanup responsibility after the receiving Impeller API succeeds.
     pub fn releaseToImpeller(self: *OwnedMapping) void {
         self.release_state = null;
         self.mapping = Mapping.borrowed("");
@@ -465,25 +466,25 @@ pub const Paint = struct {
     }
 
     /// Sets the color source applied by this paint.
-    /// The paint keeps its own reference after the call returns.
+    /// The paint keeps the required state after the call returns.
     pub fn setColorSource(self: Paint, color_source: ColorSource) void {
         c.ImpellerPaintSetColorSource(self.handle, color_source.handle);
     }
 
     /// Sets the color filter applied by this paint.
-    /// The paint keeps its own reference after the call returns.
+    /// The paint keeps the required state after the call returns.
     pub fn setColorFilter(self: Paint, color_filter: ColorFilter) void {
         c.ImpellerPaintSetColorFilter(self.handle, color_filter.handle);
     }
 
     /// Sets the mask filter applied by this paint.
-    /// The paint keeps its own reference after the call returns.
+    /// The paint keeps the required state after the call returns.
     pub fn setMaskFilter(self: Paint, mask_filter: MaskFilter) void {
         c.ImpellerPaintSetMaskFilter(self.handle, mask_filter.handle);
     }
 
     /// Sets the image filter applied by this paint.
-    /// The paint keeps its own reference after the call returns.
+    /// The paint keeps the required state after the call returns.
     pub fn setImageFilter(self: Paint, image_filter: ImageFilter) void {
         c.ImpellerPaintSetImageFilter(self.handle, image_filter.handle);
     }
@@ -1590,13 +1591,13 @@ pub const ParagraphStyle = struct {
     }
 
     /// Sets the paint used to fill glyphs.
-    /// The style keeps its own reference after the call returns.
+    /// The style keeps the required state after the call returns.
     pub fn setForeground(self: ParagraphStyle, paint: Paint) void {
         c.ImpellerParagraphStyleSetForeground(self.handle, paint.handle);
     }
 
     /// Sets the paint used behind glyphs.
-    /// The style keeps its own reference after the call returns.
+    /// The style keeps the required state after the call returns.
     pub fn setBackground(self: ParagraphStyle, paint: Paint) void {
         c.ImpellerParagraphStyleSetBackground(self.handle, paint.handle);
     }
