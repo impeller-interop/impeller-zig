@@ -115,6 +115,32 @@ test "mapping release state" {
     try std.testing.expectEqual(@as(?*anyopaque, &user_data), mapping.release_user_data);
 }
 
+test "owned mapping copy" {
+    var source = [_]u8{ 'i', 'm', 'p', 'e', 'l', 'l', 'e', 'r' };
+    var owned = try impeller.OwnedMapping.copy(std.testing.allocator, source[0..]);
+    defer owned.deinit();
+
+    source[0] = 'x';
+
+    const copied_len: usize = @intCast(owned.mapping.value.length);
+    const copied_bytes = owned.mapping.value.data[0..copied_len];
+
+    try std.testing.expectEqualStrings("impeller", copied_bytes);
+    try std.testing.expect(@intFromPtr(owned.mapping.value.data) != @intFromPtr(source[0..].ptr));
+    try std.testing.expect(owned.mapping.value.on_release != null);
+    try std.testing.expect(owned.mapping.release_user_data != null);
+}
+
+test "owned mapping release" {
+    var owned = try impeller.OwnedMapping.copy(std.testing.allocator, "impeller");
+    const mapping = owned.mapping;
+
+    owned.releaseToImpeller();
+    owned.deinit();
+
+    mapping.value.on_release.?(mapping.release_user_data);
+}
+
 test "paint clone" {
     var paint = try impeller.Paint.init();
     defer paint.deinit();

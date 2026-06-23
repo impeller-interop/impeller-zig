@@ -2,6 +2,7 @@ const std = @import("std");
 const c = @import("impeller_c");
 
 pub const Error = error{
+    OutOfMemory,
     VersionMismatch,
     CreateContextFailed,
     CreatePaintFailed,
@@ -96,6 +97,62 @@ pub const Mapping = struct {
         };
     }
 };
+
+/// Owns copied mapping bytes until cleanup is transferred or deinitialized.
+pub const OwnedMapping = struct {
+    mapping: Mapping,
+    release_state: ?*ReleaseState,
+
+    const ReleaseState = struct {
+        allocator: std.mem.Allocator,
+        bytes: []u8,
+    };
+
+    /// Copies bytes into allocator-backed storage with callback-driven cleanup.
+    /// The allocator must remain valid until the release callback has run.
+    pub fn copy(allocator: std.mem.Allocator, bytes: []const u8) Error!OwnedMapping {
+        const owned_bytes = try allocator.dupe(u8, bytes);
+        errdefer allocator.free(owned_bytes);
+
+        const release_state = try allocator.create(ReleaseState);
+        release_state.* = .{
+            .allocator = allocator,
+            .bytes = owned_bytes,
+        };
+
+        return .{
+            .mapping = Mapping.withRelease(owned_bytes, release, release_state),
+            .release_state = release_state,
+        };
+    }
+
+    /// Releases the copied bytes unless cleanup has been transferred.
+    pub fn deinit(self: *OwnedMapping) void {
+        const release_state = self.release_state orelse return;
+        releaseOwnedBytes(release_state);
+        self.release_state = null;
+        self.mapping = Mapping.borrowed("");
+    }
+
+    /// Transfers cleanup responsibility to Impeller after a successful API call.
+    pub fn releaseToImpeller(self: *OwnedMapping) void {
+        self.release_state = null;
+        self.mapping = Mapping.borrowed("");
+    }
+
+    fn release(user_data: ?*anyopaque) callconv(.c) void {
+        const data = user_data orelse return;
+        const release_state: *ReleaseState = @ptrCast(@alignCast(data));
+        releaseOwnedBytes(release_state);
+    }
+
+    fn releaseOwnedBytes(release_state: *ReleaseState) void {
+        const allocator = release_state.allocator;
+        allocator.free(release_state.bytes);
+        allocator.destroy(release_state);
+    }
+};
+
 pub const TextureDescriptor = c.ImpellerTextureDescriptor;
 pub const Callback = c.ImpellerCallback;
 pub const ProcAddressCallback = c.ImpellerProcAddressCallback;
@@ -666,7 +723,18 @@ pub const FragmentProgram = struct {
     /// Creates a fragment program borrowing impellerc-compiled bytes.
     /// The bytes must outlive all Impeller use of the program.
     pub fn initBorrowed(data: []const u8) Error!FragmentProgram {
-        return initMapping(Mapping.borrowed(data));
+        return FragmentProgram.initMapping(Mapping.borrowed(data));
+    }
+
+    /// Copies impellerc-compiled bytes and transfers cleanup to Impeller.
+    /// The allocator must remain valid until the release callback has run.
+    pub fn initCopy(allocator: std.mem.Allocator, data: []const u8) Error!FragmentProgram {
+        var owned = try OwnedMapping.copy(allocator, data);
+        errdefer owned.deinit();
+
+        const fragment_program = try FragmentProgram.initMapping(owned.mapping);
+        owned.releaseToImpeller();
+        return fragment_program;
     }
 
     /// Returns a retained fragment program owner that must be deinitialized independently.
@@ -797,10 +865,26 @@ pub const Texture = struct {
         return .{ .handle = handle };
     }
 
-    /// Creates a texture from tightly packed bytes, copying when asynchronous upload requires it.
-    /// Compressed image formats are unsupported.
-    pub fn initWithBytesCopy(context: Context, descriptor: TextureDescriptor, bytes: []const u8) Error!Texture {
-        return initWithMapping(context, descriptor, Mapping.borrowed(bytes));
+    /// Creates a texture from borrowed tightly packed, decompressed pixel bytes.
+    /// The bytes must remain valid until Impeller has finished any deferred upload.
+    pub fn initWithBorrowedBytes(context: Context, descriptor: TextureDescriptor, bytes: []const u8) Error!Texture {
+        return Texture.initWithMapping(context, descriptor, Mapping.borrowed(bytes));
+    }
+
+    /// Copies tightly packed, decompressed pixel bytes and transfers cleanup to Impeller.
+    /// The allocator must remain valid until the release callback has run.
+    pub fn initWithBytesCopy(
+        context: Context,
+        descriptor: TextureDescriptor,
+        allocator: std.mem.Allocator,
+        bytes: []const u8,
+    ) Error!Texture {
+        var owned = try OwnedMapping.copy(allocator, bytes);
+        errdefer owned.deinit();
+
+        const texture = try Texture.initWithMapping(context, descriptor, owned.mapping);
+        owned.releaseToImpeller();
+        return texture;
     }
 
     /// Adopts an existing OpenGL texture handle.
@@ -1454,6 +1538,21 @@ pub const TypographyContext = struct {
     /// Registers a font borrowing bytes that must remain valid for all font use.
     pub fn registerFontBorrowed(self: TypographyContext, bytes: []const u8, family_name_alias: ?[*:0]const u8) Error!void {
         return self.registerFontMapping(Mapping.borrowed(bytes), family_name_alias);
+    }
+
+    /// Copies font bytes and transfers cleanup to Impeller on successful registration.
+    /// The allocator must remain valid until the release callback has run.
+    pub fn registerFontCopy(
+        self: TypographyContext,
+        allocator: std.mem.Allocator,
+        bytes: []const u8,
+        family_name_alias: ?[*:0]const u8,
+    ) Error!void {
+        var owned = try OwnedMapping.copy(allocator, bytes);
+        errdefer owned.deinit();
+
+        try self.registerFontMapping(owned.mapping, family_name_alias);
+        owned.releaseToImpeller();
     }
 };
 

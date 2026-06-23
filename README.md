@@ -89,11 +89,16 @@ Handle wrappers are move-only by convention. Plain assignment copies a handle wi
 
 `Mapping.borrowed()` never takes ownership of its bytes. The caller must satisfy the lifetime required by the receiving API. `Mapping.withRelease()` forwards both the release callback and its user-data baton to Impeller; callbacks may run on background threads.
 
+`OwnedMapping.copy()` creates allocator-backed bytes for APIs that retain mappings asynchronously. After a successful Impeller call, `releaseToImpeller()` transfers cleanup to the release callback. The allocator must remain valid until that callback has run.
+
 Byte-oriented APIs name their ownership behavior explicitly:
 
 - `FragmentProgram.initBorrowed()` borrows compiled shader data.
-- `Texture.initWithBytesCopy()` allows Impeller to copy pixel data when asynchronous upload requires it.
+- `FragmentProgram.initCopy()` copies compiled shader data into an allocator-backed mapping.
+- `Texture.initWithBorrowedBytes()` borrows tightly packed pixel data; keep the bytes valid for Impeller's required upload lifetime.
+- `Texture.initWithBytesCopy()` copies tightly packed pixel data into an allocator-backed mapping.
 - `TypographyContext.registerFontBorrowed()` requires font data to remain valid for all font use; process-lifetime data such as `@embedFile` is recommended.
+- `TypographyContext.registerFontCopy()` copies font data into an allocator-backed mapping.
 
 ## Status
 
