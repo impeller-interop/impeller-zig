@@ -465,21 +465,25 @@ pub const Paint = struct {
     }
 
     /// Sets the color source applied by this paint.
+    /// The paint keeps its own reference after the call returns.
     pub fn setColorSource(self: Paint, color_source: ColorSource) void {
         c.ImpellerPaintSetColorSource(self.handle, color_source.handle);
     }
 
     /// Sets the color filter applied by this paint.
+    /// The paint keeps its own reference after the call returns.
     pub fn setColorFilter(self: Paint, color_filter: ColorFilter) void {
         c.ImpellerPaintSetColorFilter(self.handle, color_filter.handle);
     }
 
     /// Sets the mask filter applied by this paint.
+    /// The paint keeps its own reference after the call returns.
     pub fn setMaskFilter(self: Paint, mask_filter: MaskFilter) void {
         c.ImpellerPaintSetMaskFilter(self.handle, mask_filter.handle);
     }
 
     /// Sets the image filter applied by this paint.
+    /// The paint keeps its own reference after the call returns.
     pub fn setImageFilter(self: Paint, image_filter: ImageFilter) void {
         c.ImpellerPaintSetImageFilter(self.handle, image_filter.handle);
     }
@@ -1186,6 +1190,7 @@ pub const DisplayListBuilder = struct {
     }
 
     /// Draws the specified shape.
+    /// The builder keeps the required draw state after the call returns.
     pub fn drawPath(self: DisplayListBuilder, path: Path, paint: Paint) void {
         c.ImpellerDisplayListBuilderDrawPath(self.handle, path.raw(), paint.handle);
     }
@@ -1211,6 +1216,7 @@ pub const DisplayListBuilder = struct {
     }
 
     /// Flattens another display list into this one.
+    /// The builder keeps the required draw state after the call returns.
     pub fn drawDisplayList(self: DisplayListBuilder, display_list: DisplayList, opacity: f32) void {
         c.ImpellerDisplayListBuilderDrawDisplayList(self.handle, display_list.handle, opacity);
     }
@@ -1584,11 +1590,13 @@ pub const ParagraphStyle = struct {
     }
 
     /// Sets the paint used to fill glyphs.
+    /// The style keeps its own reference after the call returns.
     pub fn setForeground(self: ParagraphStyle, paint: Paint) void {
         c.ImpellerParagraphStyleSetForeground(self.handle, paint.handle);
     }
 
     /// Sets the paint used behind glyphs.
+    /// The style keeps its own reference after the call returns.
     pub fn setBackground(self: ParagraphStyle, paint: Paint) void {
         c.ImpellerParagraphStyleSetBackground(self.handle, paint.handle);
     }

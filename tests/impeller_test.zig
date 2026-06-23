@@ -150,3 +150,89 @@ test "paint clone" {
 
     try std.testing.expectEqual(paint.raw(), cloned.raw());
 }
+
+test "paint child refs" {
+    var paint = try impeller.Paint.init();
+    defer paint.deinit();
+
+    const colors = [_]impeller.Color{
+        impeller.srgb(1.0, 0.0, 0.0, 1.0),
+        impeller.srgb(0.0, 0.0, 1.0, 1.0),
+    };
+    const stops = [_]f32{ 0.0, 1.0 };
+
+    var color_source = try impeller.ColorSource.initLinearGradient(
+        impeller.point(0.0, 0.0),
+        impeller.point(10.0, 10.0),
+        colors[0..],
+        stops[0..],
+        impeller.tile_modes.clamp,
+        null,
+    );
+    paint.setColorSource(color_source);
+    color_source.deinit();
+
+    var color_filter = try impeller.ColorFilter.initBlend(
+        impeller.srgb(1.0, 1.0, 1.0, 1.0),
+        impeller.blend_modes.source_over,
+    );
+    paint.setColorFilter(color_filter);
+    color_filter.deinit();
+
+    var mask_filter = try impeller.MaskFilter.initBlur(impeller.blur_styles.normal, 2.0);
+    paint.setMaskFilter(mask_filter);
+    mask_filter.deinit();
+
+    var image_filter = try impeller.ImageFilter.initBlur(2.0, 2.0, impeller.tile_modes.clamp);
+    paint.setImageFilter(image_filter);
+    image_filter.deinit();
+
+    var builder = try impeller.DisplayListBuilder.init(null);
+    defer builder.deinit();
+    builder.drawRect(impeller.rect(0.0, 0.0, 8.0, 8.0), paint);
+
+    var display_list = try builder.build();
+    defer display_list.deinit();
+}
+
+test "draw child refs" {
+    var paint = try impeller.Paint.init();
+    var path_builder = try impeller.PathBuilder.init();
+    defer path_builder.deinit();
+
+    path_builder.addRect(impeller.rect(0.0, 0.0, 4.0, 4.0));
+    var path = try path_builder.takePath(impeller.fill_types.non_zero);
+
+    var builder = try impeller.DisplayListBuilder.init(null);
+    defer builder.deinit();
+    builder.drawPath(path, paint);
+
+    path.deinit();
+    paint.deinit();
+
+    var display_list = try builder.build();
+    defer display_list.deinit();
+
+    var parent_builder = try impeller.DisplayListBuilder.init(null);
+    defer parent_builder.deinit();
+    parent_builder.drawDisplayList(display_list, 1.0);
+
+    display_list.deinit();
+
+    var parent_list = try parent_builder.build();
+    defer parent_list.deinit();
+}
+
+test "paragraph paint refs" {
+    var foreground = try impeller.Paint.init();
+    var background = try impeller.Paint.init();
+
+    var style = try impeller.ParagraphStyle.init();
+    defer style.deinit();
+
+    style.setForeground(foreground);
+    style.setBackground(background);
+
+    foreground.deinit();
+    background.deinit();
+}
