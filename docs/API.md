@@ -1,6 +1,6 @@
 # API
 
-A quick reference for the binding. The Zig source remains the source of truth.
+A quick reference for the Zig wrapper. The Zig source remains the source of truth.
 
 ## Contents
 
@@ -8,7 +8,9 @@ A quick reference for the binding. The Zig source remains the source of truth.
   - [Handles](#handles)
   - [Bytes](#bytes)
   - [Draw state](#draw-state)
-- [Constants and aliases](#constants-and-aliases)
+- [Raw C API](#raw-c-api)
+- [Module layout](#module-layout)
+- [Public types](#public-types)
   - [Error values](#error-values)
 - [Value namespaces](#value-namespaces)
 - [Top-level helpers](#top-level-helpers)
@@ -98,7 +100,37 @@ These APIs keep the state required after the call returns:
 
 The unit tests cover build-time lifetime behavior. Texture draws still need a real Context/Surface render test.
 
-## Constants and aliases
+## Raw C API
+
+Raw translated C bindings are available from the `impeller.c` namespace. This is not a
+source file; it is the module produced from `impeller.h` during the build.
+
+Prefer the Zig wrappers in the top-level `impeller` namespace for normal use. The raw namespace is an escape hatch for APIs that have not been wrapped yet or for integration code that already works in C terms.
+
+## Module layout
+
+| Module | Purpose |
+| --- | --- |
+| `impeller.geometry` | `Point`, `Rect`, `Matrix`, `RoundingRadii`, and geometry helpers. |
+| `impeller.color` | `Color`, color spaces, and `srgb()`. |
+| `impeller.context` | `Context` and graphics backend context creation. |
+| `impeller.texture` | `Texture`, texture descriptors, pixel formats, and sampling. |
+| `impeller.paint` | Paint state, blend modes, filters, color sources, and fragment programs. |
+| `impeller.path` | `Path`, `PathBuilder`, and fill rules. |
+| `impeller.display_list` | `DisplayList`, `DisplayListBuilder`, and clip operations. |
+| `impeller.surface` | `Surface` and Vulkan swapchain wrappers. |
+| `impeller.text` | Typography, paragraphs, glyph metrics, and text style values. |
+
+The top-level `impeller` namespace re-exports the common names for concise call sites:
+
+```zig
+var paint = try impeller.Paint.init();
+defer paint.deinit();
+
+paint.setColor(impeller.srgb(1.0, 0.2, 0.1, 1.0));
+```
+
+## Public types
 
 | Name | Kind | Purpose |
 | --- | --- | --- |
@@ -108,41 +140,41 @@ The unit tests cover build-time lifetime behavior. Texture draws still need a re
 | `version_major` | constant | Packed version major component. |
 | `version_minor` | constant | Packed version minor component. |
 | `version_patch` | constant | Packed version patch component. |
-| `ColorSpace` | enum alias | Color space identifiers. |
-| `PixelFormat` | enum alias | Texture pixel format identifiers. |
-| `TextureSampling` | enum alias | Texture sampling modes. |
-| `FillType` | enum alias | Path fill rules. |
-| `ClipOperation` | enum alias | Clip combination operations. |
-| `BlendMode` | enum alias | Paint blending modes. |
-| `DrawStyle` | enum alias | Paint fill/stroke mode. |
-| `StrokeCap` | enum alias | Stroke endpoint style. |
-| `StrokeJoin` | enum alias | Stroke join style. |
-| `TileMode` | enum alias | Gradient/image tiling mode. |
-| `BlurStyle` | enum alias | Mask blur style. |
-| `FontWeight` | enum alias | Text font weight. |
-| `FontStyle` | enum alias | Text font style. |
-| `TextAlignment` | enum alias | Paragraph horizontal alignment. |
-| `TextDirection` | enum alias | Text direction. |
-| `TextDecorationType` | enum alias | Underline/overline/strike decoration type. |
-| `TextDecorationStyle` | enum alias | Decoration stroke style. |
-| `Point` | struct alias | 2D point. |
-| `Size` | struct alias | Floating-point size. |
-| `ISize` | struct alias | Integer pixel size. |
-| `Range` | struct alias | UTF-16 code unit range. |
-| `Rect` | struct alias | Rectangle. |
-| `Matrix` | struct alias | 4x4 transform matrix. |
-| `ColorMatrix` | struct alias | 4x5 color matrix. |
-| `RoundingRadii` | struct alias | Rounded rectangle corner radii. |
-| `VulkanInfo` | struct alias | Vulkan handles owned by a context. |
-| `VulkanSettings` | struct alias | Vulkan context creation settings. |
-| `TextDecoration` | struct alias | Text decoration parameters. |
-| `Color` | struct alias | RGBA color with color space. |
-| `TextureDescriptor` | struct alias | Texture format, size, and mip count. |
-| `Callback` | callback alias | Generic Impeller callback. |
-| `ProcAddressCallback` | callback alias | OpenGL procedure resolver. |
-| `VulkanProcAddressCallback` | callback alias | Vulkan procedure resolver. |
-| `ImageFilterHandle` | handle alias | Raw image filter handle for sampler arrays. |
-| `TextureHandle` | handle alias | Raw texture handle for sampler arrays. |
+| `ColorSpace` | enum | Color space identifiers. |
+| `PixelFormat` | enum | Texture pixel format identifiers. |
+| `TextureSampling` | enum | Texture sampling modes. |
+| `FillType` | enum | Path fill rules. |
+| `ClipOperation` | enum | Clip combination operations. |
+| `BlendMode` | enum | Paint blending modes. |
+| `DrawStyle` | enum | Paint fill/stroke mode. |
+| `StrokeCap` | enum | Stroke endpoint style. |
+| `StrokeJoin` | enum | Stroke join style. |
+| `TileMode` | enum | Gradient/image tiling mode. |
+| `BlurStyle` | enum | Mask blur style. |
+| `FontWeight` | enum | Text font weight. |
+| `FontStyle` | enum | Text font style. |
+| `TextAlignment` | enum | Paragraph horizontal alignment. |
+| `TextDirection` | enum | Text direction. |
+| `TextDecorationType` | packed struct | Underline/overline/strike decoration flags. |
+| `TextDecorationStyle` | enum | Decoration stroke style. |
+| `Point` | extern struct | 2D point. |
+| `Size` | extern struct | Floating-point size. |
+| `ISize` | extern struct | Integer pixel size. |
+| `Range` | extern struct | UTF-16 code unit range. |
+| `Rect` | extern struct | Rectangle. |
+| `Matrix` | extern struct | 4x4 transform matrix. |
+| `ColorMatrix` | extern struct | 4x5 color matrix. |
+| `RoundingRadii` | extern struct | Rounded rectangle corner radii. |
+| `VulkanInfo` | extern struct | Vulkan handles owned by a context. |
+| `VulkanSettings` | C struct | Vulkan context creation settings. |
+| `TextDecoration` | extern struct | Text decoration parameters. |
+| `Color` | extern struct | RGBA color with color space. |
+| `TextureDescriptor` | extern struct | Texture format, size, and mip count. |
+| `Callback` | callback | Generic Impeller callback. |
+| `ProcAddressCallback` | callback | OpenGL procedure resolver. |
+| `VulkanProcAddressCallback` | callback | Vulkan procedure resolver. |
+| `ImageFilterHandle` | raw handle | Raw image filter handle for sampler arrays. |
+| `TextureHandle` | raw handle | Raw texture handle for sampler arrays. |
 
 ### Error values
 
@@ -461,8 +493,11 @@ The unit tests cover build-time lifetime behavior. Texture draws still need a re
 | `deinit()` | Release typography context owner. |
 | `raw()` | Return raw typography context handle. |
 | `registerFontMapping()` | Register font from caller-managed mapping. |
+| `registerFontMappingPtr()` | Register font from caller-managed mapping with a C string alias pointer. |
 | `registerFontBorrowed()` | Register font from borrowed bytes. |
+| `registerFontBorrowedPtr()` | Register font from borrowed bytes with a C string alias pointer. |
 | `registerFontCopy()` | Register font from copied bytes. |
+| `registerFontCopyPtr()` | Register font from copied bytes with a C string alias pointer. |
 
 ### ParagraphStyle
 
@@ -478,6 +513,7 @@ The unit tests cover build-time lifetime behavior. Texture draws still need a re
 | `setFontWeight()` | Set font weight. |
 | `setFontStyle()` | Set font style. |
 | `setFontFamily()` | Set font family. |
+| `setFontFamilyPtr()` | Set font family from a C string pointer. |
 | `setFontSize()` | Set font size. |
 | `setHeight()` | Set line height multiplier. |
 | `setTextAlignment()` | Set horizontal alignment. |
@@ -485,7 +521,9 @@ The unit tests cover build-time lifetime behavior. Texture draws still need a re
 | `setTextDecoration()` | Set decoration. |
 | `setMaxLines()` | Set max visible lines. |
 | `setLocale()` | Set locale. |
+| `setLocalePtr()` | Set locale from a C string pointer. |
 | `setEllipsis()` | Set truncation ellipsis. |
+| `setEllipsisPtr()` | Set truncation ellipsis from a C string pointer. |
 
 ### ParagraphBuilder
 

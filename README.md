@@ -1,6 +1,6 @@
 # impeller-zig
 
-Zig bindings for Impeller's standalone `impeller.h` API.
+Zig wrapper for Impeller's standalone `impeller.h` API.
 
 Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/impeller-interop/impeller-sdk).
 
@@ -17,6 +17,7 @@ Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/imp
 - macOS + Metal
 - Windows + Vulkan
 - Zig wrappers for contexts, surfaces, paints, paths, textures, display lists, typography, and basic geometry
+- Flat domain modules such as `impeller.geometry`, `impeller.paint`, `impeller.path`, and `impeller.text`
 
 ## Install
 
@@ -62,6 +63,28 @@ Then import it:
 ```zig
 const impeller = @import("impeller");
 ```
+
+The main API is Zig-first:
+
+```zig
+var paint = try impeller.Paint.init();
+defer paint.deinit();
+
+paint.setColor(impeller.srgb(1.0, 0.2, 0.1, 1.0));
+```
+
+Common types are re-exported at the root for concise call sites. The same API is also split into flat domain modules:
+
+```zig
+const geometry = impeller.geometry;
+const paint = impeller.paint;
+
+const bounds = geometry.rect(0.0, 0.0, 640.0, 480.0);
+var fill = try paint.Paint.init();
+defer fill.deinit();
+```
+
+Use the `impeller.c` namespace only when you need raw C functions that are not wrapped yet.
 
 The runtime link step is explicit so projects that only import the package without using Impeller do not load `libimpeller`.
 

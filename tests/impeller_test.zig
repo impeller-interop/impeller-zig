@@ -1,6 +1,20 @@
 const std = @import("std");
 const impeller = @import("impeller");
 
+test "public declarations compile" {
+    std.testing.refAllDecls(impeller);
+    std.testing.refAllDecls(impeller.geometry);
+    std.testing.refAllDecls(impeller.color);
+    std.testing.refAllDecls(impeller.context);
+    std.testing.refAllDecls(impeller.mapping);
+    std.testing.refAllDecls(impeller.texture);
+    std.testing.refAllDecls(impeller.paint);
+    std.testing.refAllDecls(impeller.path);
+    std.testing.refAllDecls(impeller.display_list);
+    std.testing.refAllDecls(impeller.surface);
+    std.testing.refAllDecls(impeller.text);
+}
+
 test "srgb fields" {
     const color = impeller.srgb(0.1, 0.2, 0.3, 0.4);
 
@@ -25,6 +39,22 @@ test "point fields" {
 
     try std.testing.expectEqual(@as(f32, 5.0), value.x);
     try std.testing.expectEqual(@as(f32, 6.0), value.y);
+}
+
+test "matrix round trips" {
+    const values = [_]f32{
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        2.0, 3.0, 4.0, 1.0,
+    };
+    const raw: impeller.c.ImpellerMatrix = .{ .m = values };
+
+    const matrix = impeller.Matrix.fromC(raw);
+    const converted = matrix.toC();
+
+    try std.testing.expectEqual(values, matrix.m);
+    try std.testing.expectEqual(values, converted.m);
 }
 
 test "radii uniform" {
@@ -89,6 +119,27 @@ test "callback aliases" {
         _ = callback;
         _ = proc_address_callback;
         _ = vulkan_proc_address_callback;
+    }
+}
+
+test "raw c namespace is available" {
+    comptime {
+        _ = impeller.c.ImpellerGetVersion;
+        _ = impeller.c.ImpellerPaintNew;
+    }
+}
+
+test "sentinel string APIs" {
+    comptime {
+        const set_font_family = @typeInfo(@TypeOf(impeller.ParagraphStyle.setFontFamily)).@"fn";
+        const set_locale = @typeInfo(@TypeOf(impeller.ParagraphStyle.setLocale)).@"fn";
+        const set_ellipsis = @typeInfo(@TypeOf(impeller.ParagraphStyle.setEllipsis)).@"fn";
+        const register_font = @typeInfo(@TypeOf(impeller.TypographyContext.registerFontBorrowed)).@"fn";
+
+        std.debug.assert(set_font_family.params[1].type.? == [:0]const u8);
+        std.debug.assert(set_locale.params[1].type.? == [:0]const u8);
+        std.debug.assert(set_ellipsis.params[1].type.? == ?[:0]const u8);
+        std.debug.assert(register_font.params[2].type.? == ?[:0]const u8);
     }
 }
 
