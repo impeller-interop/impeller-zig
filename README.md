@@ -5,8 +5,8 @@ Zig wrapper for Impeller's standalone `impeller.h` API.
 Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/impeller-interop/impeller-sdk).
 
 <p align="left">
-  <img src="https://github.com/user-attachments/assets/938615ee-55aa-4a76-a106-c778151ede53" height="300">
-  <img src="https://github.com/user-attachments/assets/07dd8543-4f0a-4dc1-ab9f-76c4e3a9a3ad" height="300"/>
+  <img src="https://github.com/user-attachments/assets/490aced2-7c7a-4a00-84ad-bdac6e7cb9ea" height="300"/>
+  <img src="https://github.com/user-attachments/assets/f5cb1140-2d40-42cd-b9a0-0d9366a72ce7" height="300"/>
 </p>
 
 > Examples [here](https://github.com/impeller-interop/impeller-zig-examples).
