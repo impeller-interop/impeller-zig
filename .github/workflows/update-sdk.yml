@@ -1,0 +1,70 @@
+name: Update Impeller SDK
+
+on:
+  schedule:
+    # Runs after impeller-sdk's stable packaging CI (01:00 UTC) finishes.
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    name: Check for upstream SDK updates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      - name: Check and update Impeller SDK
+        id: update
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          repo="https://github.com/impeller-interop/impeller-sdk.git"
+          new_sha="$(git ls-remote "$repo" refs/heads/stable | cut -f1)"
+          current_sha="$(grep -oP 'ref=stable#\K[0-9a-f]+' build.zig.zon | head -1)"
+
+          echo "pinned=$current_sha"
+          echo "latest=$new_sha"
+
+          if [ -z "$new_sha" ]; then
+            echo "::error::failed to resolve the impeller-sdk stable commit"
+            exit 1
+          fi
+          if [ -z "$current_sha" ]; then
+            echo "::error::failed to parse the pinned impeller-sdk commit from build.zig.zon"
+            exit 1
+          fi
+
+          if [ "$new_sha" = "$current_sha" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Impeller SDK is up to date."
+            exit 0
+          fi
+
+          zig fetch --save "git+https://github.com/impeller-interop/impeller-sdk?ref=stable#$new_sha"
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "sha=$new_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Open pull request
+        if: steps.update.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "chore: update impeller sdk"
+          branch: "chore/update-impeller-sdk"
+          title: "chore: update impeller sdk"
+          body: |
+            Updates the pinned Impeller SDK to the latest `stable` commit.
+
+            `${{ steps.update.outputs.sha }}`
+          delete-branch: true
