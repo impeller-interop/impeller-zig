@@ -122,6 +122,11 @@ test "callback aliases" {
     }
 }
 
+test "enum fromC rejects unknown values" {
+    const invalid: impeller.c.ImpellerColorSpace = 999;
+    try std.testing.expectError(error.InvalidEnumTag, impeller.ColorSpace.fromC(invalid));
+}
+
 test "raw c namespace is available" {
     comptime {
         _ = impeller.c.ImpellerGetVersion;

@@ -64,8 +64,8 @@ pub const TextDirection = enum(c.ImpellerTextDirection) {
     rtl = c.kImpellerTextDirectionRTL,
     ltr = c.kImpellerTextDirectionLTR,
 
-    pub fn fromC(value: c.ImpellerTextDirection) TextDirection {
-        return @enumFromInt(value);
+    pub fn fromC(value: c.ImpellerTextDirection) error{InvalidEnumTag}!TextDirection {
+        return std.enums.fromInt(TextDirection, value) orelse error.InvalidEnumTag;
     }
 
     pub fn toC(self: TextDirection) c.ImpellerTextDirection {
@@ -653,7 +653,7 @@ pub const GlyphInfo = struct {
     }
 
     /// Returns the direction of the run containing this glyph.
-    pub fn getTextDirection(self: GlyphInfo) TextDirection {
+    pub fn getTextDirection(self: GlyphInfo) error{InvalidEnumTag}!TextDirection {
         return TextDirection.fromC(c.ImpellerGlyphInfoGetTextDirection(self.handle));
     }
 };

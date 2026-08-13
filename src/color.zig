@@ -6,8 +6,8 @@ pub const Space = enum(c.ImpellerColorSpace) {
     extended_srgb = c.kImpellerColorSpaceExtendedSRGB,
     display_p3 = c.kImpellerColorSpaceDisplayP3,
 
-    pub fn fromC(value: c.ImpellerColorSpace) Space {
-        return @enumFromInt(value);
+    pub fn fromC(value: c.ImpellerColorSpace) error{InvalidEnumTag}!Space {
+        return std.enums.fromInt(Space, value) orelse error.InvalidEnumTag;
     }
 
     pub fn toC(self: Space) c.ImpellerColorSpace {
