@@ -166,7 +166,7 @@ paint.setColor(impeller.srgb(1.0, 0.2, 0.1, 1.0));
 | `ColorMatrix` | extern struct | 4x5 color matrix. |
 | `RoundingRadii` | extern struct | Rounded rectangle corner radii. |
 | `VulkanInfo` | extern struct | Vulkan handles owned by a context. |
-| `VulkanSettings` | C struct | Vulkan context creation settings. |
+| `VulkanSettings` | extern struct | Vulkan context creation settings. |
 | `TextDecoration` | extern struct | Text decoration parameters. |
 | `Color` | extern struct | RGBA color with color space. |
 | `TextureDescriptor` | extern struct | Texture format, size, and mip count. |
@@ -202,6 +202,7 @@ paint.setColor(impeller.srgb(1.0, 0.2, 0.1, 1.0));
 | `CreateLineMetricsFailed` | Line metrics creation failed. |
 | `CreateGlyphInfoFailed` | Glyph info creation failed. |
 | `CreateVulkanSwapchainFailed` | Vulkan swapchain creation failed. |
+| `CreateSurfaceFailed` | Surface creation failed. |
 | `AcquireSurfaceFailed` | Swapchain surface acquisition failed. |
 | `DrawFailed` | Surface draw failed. |
 | `PresentFailed` | Surface present failed. |
@@ -345,8 +346,7 @@ paint.setColor(impeller.srgb(1.0, 0.2, 0.1, 1.0));
 | `initConicalGradient()` | Create conical gradient. |
 | `initSweepGradient()` | Create sweep gradient. |
 | `initImage()` | Create image-backed color source. |
-| `initFragmentProgram()` | Create fragment-program color source from raw sampler/data pointers. |
-| `initFragmentProgramSlices()` | Create fragment-program color source from Zig slices. |
+| `initFragmentProgram()` | Create fragment-program color source from sampler textures and uniform data. |
 | `clone()` | Retain a color source owner. |
 | `deinit()` | Release a color source owner. |
 | `raw()` | Return the raw color source handle. |
@@ -370,8 +370,7 @@ paint.setColor(impeller.srgb(1.0, 0.2, 0.1, 1.0));
 | `initDilate()` | Create dilate image filter. |
 | `initErode()` | Create erode image filter. |
 | `initMatrix()` | Create matrix image filter. |
-| `initFragmentProgram()` | Create fragment-program image filter from raw sampler/data pointers. |
-| `initFragmentProgramSlices()` | Create fragment-program image filter from Zig slices. |
+| `initFragmentProgram()` | Create fragment-program image filter from sampler textures and uniform data. |
 | `initCompose()` | Compose image filters. |
 | `clone()` | Retain an image filter owner. |
 | `deinit()` | Release an image filter owner. |

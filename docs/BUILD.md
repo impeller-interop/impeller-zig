@@ -158,3 +158,5 @@ Windows uses the import library for linking and the DLL at runtime.
 On Windows, prefer `.install_dir = .bin`. Custom DLL directories require a launcher that updates `PATH`, or application code that configures DLL search paths.
 
 For macOS app bundles, let the application packaging layer decide the bundle layout.
+
+On Linux, prefer the X11 windowing backend; Impeller's Vulkan surface integration currently has poor Wayland support.
