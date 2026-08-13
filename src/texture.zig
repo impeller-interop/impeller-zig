@@ -11,8 +11,8 @@ pub const TextureHandle = c.ImpellerTexture;
 pub const PixelFormat = enum(c.ImpellerPixelFormat) {
     rgba8888 = c.kImpellerPixelFormatRGBA8888,
 
-    pub fn fromC(value: c.ImpellerPixelFormat) PixelFormat {
-        return @enumFromInt(value);
+    pub fn fromC(value: c.ImpellerPixelFormat) error{InvalidEnumTag}!PixelFormat {
+        return std.enums.fromInt(PixelFormat, value) orelse error.InvalidEnumTag;
     }
 
     pub fn toC(self: PixelFormat) c.ImpellerPixelFormat {
@@ -123,8 +123,8 @@ pub const Texture = struct {
     }
 };
 
-pub fn handlesFromSlice(textures: []const Texture) ![]TextureHandle {
-    const handles = try std.heap.page_allocator.alloc(TextureHandle, textures.len);
+pub fn handlesFromSlice(allocator: std.mem.Allocator, textures: []const Texture) ![]TextureHandle {
+    const handles = try allocator.alloc(TextureHandle, textures.len);
     for (textures, 0..) |texture, index| {
         handles[index] = texture.handle;
     }

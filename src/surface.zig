@@ -13,13 +13,13 @@ pub const Surface = struct {
     /// Wraps an existing framebuffer object as an Impeller surface.
     pub fn wrapFBO(context: Context, fbo: u64, format: texture.PixelFormat, size: ISize) Error!Surface {
         var local_size = size.toC();
-        const handle = c.ImpellerSurfaceCreateWrappedFBONew(context.handle, fbo, format.toC(), &local_size) orelse return Error.AcquireSurfaceFailed;
+        const handle = c.ImpellerSurfaceCreateWrappedFBONew(context.handle, fbo, format.toC(), &local_size) orelse return Error.CreateSurfaceFailed;
         return .{ .handle = handle };
     }
 
     /// Wraps an existing Metal drawable as an Impeller surface.
     pub fn wrapMetalDrawable(context: Context, metal_drawable: *anyopaque) Error!Surface {
-        const handle = c.ImpellerSurfaceCreateWrappedMetalDrawableNew(context.handle, metal_drawable) orelse return Error.AcquireSurfaceFailed;
+        const handle = c.ImpellerSurfaceCreateWrappedMetalDrawableNew(context.handle, metal_drawable) orelse return Error.CreateSurfaceFailed;
         return .{ .handle = handle };
     }
 

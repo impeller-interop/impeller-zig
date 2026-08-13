@@ -1,10 +1,25 @@
+const std = @import("std");
 const c = @import("impeller_c");
 const Error = @import("errors.zig").Error;
 const version = @import("version.zig");
 
 pub const ProcAddressCallback = c.ImpellerProcAddressCallback;
 pub const VulkanProcAddressCallback = c.ImpellerVulkanProcAddressCallback;
-pub const VulkanSettings = c.ImpellerContextVulkanSettings;
+
+/// Vulkan context creation settings.
+pub const VulkanSettings = extern struct {
+    user_data: ?*anyopaque,
+    proc_address_callback: VulkanProcAddressCallback,
+    enable_validation: bool,
+
+    pub fn toC(self: VulkanSettings) c.ImpellerContextVulkanSettings {
+        return .{
+            .user_data = self.user_data,
+            .proc_address_callback = self.proc_address_callback,
+            .enable_vulkan_validation = self.enable_validation,
+        };
+    }
+};
 
 pub const VulkanInfo = extern struct {
     vk_instance: ?*anyopaque,
@@ -30,7 +45,7 @@ pub const Context = struct {
     /// Creates a Vulkan Impeller context from user-provided Vulkan resolver settings.
     pub fn initVulkan(settings: VulkanSettings) Error!Context {
         try version.check();
-        var local_settings = settings;
+        var local_settings = settings.toC();
         const handle = c.ImpellerContextCreateVulkanNew(
             version.value,
             &local_settings,
@@ -77,3 +92,10 @@ pub const Context = struct {
         return VulkanInfo.fromC(info);
     }
 };
+
+comptime {
+    std.debug.assert(@sizeOf(VulkanSettings) == @sizeOf(c.ImpellerContextVulkanSettings));
+    std.debug.assert(@alignOf(VulkanSettings) == @alignOf(c.ImpellerContextVulkanSettings));
+    std.debug.assert(@sizeOf(VulkanInfo) == @sizeOf(c.ImpellerContextVulkanInfo));
+    std.debug.assert(@alignOf(VulkanInfo) == @alignOf(c.ImpellerContextVulkanInfo));
+}

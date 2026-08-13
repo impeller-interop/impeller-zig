@@ -358,43 +358,26 @@ pub const ColorSource = struct {
         return .{ .handle = handle };
     }
 
-    /// Creates a fragment-program color source from caller-managed sampler and data pointers.
+    /// Creates a fragment-program color source from a compiled program, sampler
+    /// textures, and a uniform data buffer.
     pub fn initFragmentProgram(
-        context: ContextType,
-        fragment_program: FragmentProgram,
-        samplers: ?[*]texture_mod.TextureHandle,
-        samplers_count: usize,
-        data: ?[*]const u8,
-        data_bytes_length: usize,
-    ) Error!ColorSource {
-        const handle = c.ImpellerColorSourceCreateFragmentProgramNew(
-            context.handle,
-            fragment_program.handle,
-            samplers,
-            samplers_count,
-            data,
-            data_bytes_length,
-        ) orelse return Error.CreateColorSourceFailed;
-        return .{ .handle = handle };
-    }
-
-    /// Creates a fragment-program color source from Zig slices.
-    pub fn initFragmentProgramSlices(
+        allocator: std.mem.Allocator,
         context: ContextType,
         fragment_program: FragmentProgram,
         samplers: []const Texture,
         data: []const u8,
     ) Error!ColorSource {
-        const sampler_handles = try texture_mod.handlesFromSlice(samplers);
-        defer std.heap.page_allocator.free(sampler_handles);
-        return initFragmentProgram(
-            context,
-            fragment_program,
+        const sampler_handles = try texture_mod.handlesFromSlice(allocator, samplers);
+        defer allocator.free(sampler_handles);
+        const handle = c.ImpellerColorSourceCreateFragmentProgramNew(
+            context.handle,
+            fragment_program.handle,
             if (sampler_handles.len == 0) null else sampler_handles.ptr,
             sampler_handles.len,
             if (data.len == 0) null else data.ptr,
             data.len,
-        );
+        ) orelse return Error.CreateColorSourceFailed;
+        return .{ .handle = handle };
     }
 
     /// Returns a retained color source owner that must be deinitialized independently.
@@ -501,43 +484,26 @@ pub const ImageFilter = struct {
         return .{ .handle = handle };
     }
 
-    /// Creates a fragment-program image filter from caller-managed sampler and data pointers.
+    /// Creates a fragment-program image filter from a compiled program, sampler
+    /// textures, and a uniform data buffer.
     pub fn initFragmentProgram(
-        context: ContextType,
-        fragment_program: FragmentProgram,
-        samplers: ?[*]texture_mod.TextureHandle,
-        samplers_count: usize,
-        data: ?[*]const u8,
-        data_bytes_length: usize,
-    ) Error!ImageFilter {
-        const handle = c.ImpellerImageFilterCreateFragmentProgramNew(
-            context.handle,
-            fragment_program.handle,
-            samplers,
-            samplers_count,
-            data,
-            data_bytes_length,
-        ) orelse return Error.CreateImageFilterFailed;
-        return .{ .handle = handle };
-    }
-
-    /// Creates a fragment-program image filter from Zig slices.
-    pub fn initFragmentProgramSlices(
+        allocator: std.mem.Allocator,
         context: ContextType,
         fragment_program: FragmentProgram,
         samplers: []const Texture,
         data: []const u8,
     ) Error!ImageFilter {
-        const sampler_handles = try texture_mod.handlesFromSlice(samplers);
-        defer std.heap.page_allocator.free(sampler_handles);
-        return initFragmentProgram(
-            context,
-            fragment_program,
+        const sampler_handles = try texture_mod.handlesFromSlice(allocator, samplers);
+        defer allocator.free(sampler_handles);
+        const handle = c.ImpellerImageFilterCreateFragmentProgramNew(
+            context.handle,
+            fragment_program.handle,
             if (sampler_handles.len == 0) null else sampler_handles.ptr,
             sampler_handles.len,
             if (data.len == 0) null else data.ptr,
             data.len,
-        );
+        ) orelse return Error.CreateImageFilterFailed;
+        return .{ .handle = handle };
     }
 
     /// Creates a composed image filter.

@@ -21,6 +21,7 @@ pub const Error = error{
     CreateLineMetricsFailed,
     CreateGlyphInfoFailed,
     CreateVulkanSwapchainFailed,
+    CreateSurfaceFailed,
     AcquireSurfaceFailed,
     DrawFailed,
     PresentFailed,
