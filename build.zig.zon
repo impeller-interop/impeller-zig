@@ -1,6 +1,6 @@
 .{
     .name = .impeller_zig,
-    .version = "0.0.1",
+    .version = "0.1.0",
     .fingerprint = 0x084b62fe5a788419,
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
