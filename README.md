@@ -4,12 +4,18 @@ Zig wrapper for Impeller's standalone `impeller.h` API.
 
 Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/impeller-interop/impeller-sdk).
 
-<p align="left">
-  <img src="https://github.com/user-attachments/assets/490aced2-7c7a-4a00-84ad-bdac6e7cb9ea" height="300"/>
-  <img src="https://github.com/user-attachments/assets/f5cb1140-2d40-42cd-b9a0-0d9366a72ce7" height="300"/>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f143b456-1d55-4309-9817-6b53f7ab2ccb" height="300"/>
+  <img src="https://github.com/user-attachments/assets/71ce96fe-fbe4-4195-aa36-aeee224b3830" height="300"/>
 </p>
 
-> Examples [here](https://github.com/impeller-interop/impeller-zig-examples).
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/91145633-42b5-429e-9b43-99e7b27af426" width="700"/>
+</p>
+
+<p align="center">
+  <strong><a href="https://github.com/impeller-interop/impeller-zig-examples">Explore runnable examples →</a></strong>
+</p>
 
 ## Features
 
@@ -116,7 +122,7 @@ try surface.present();
 
 ## Examples
 
-Runnable examples now live in the separate `impeller-zig-examples` repository so this package stays a pure library dependency with no windowing requirement.
+Runnable examples live in [`impeller-zig-examples`](https://github.com/impeller-interop/impeller-zig-examples), keeping this package a pure library dependency with no windowing requirement.
 
 ## API notes
 
