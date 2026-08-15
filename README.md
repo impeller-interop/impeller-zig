@@ -1,5 +1,7 @@
 # impeller-zig
 
+[![Zig support](https://zig-support.dkx215417.workers.dev/0.16.0/0.15.2/0.15.1/badge.svg)](https://ziglang.org/download/)
+
 Zig wrapper for Impeller's standalone `impeller.h` API.
 
 Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/impeller-interop/impeller-sdk).
