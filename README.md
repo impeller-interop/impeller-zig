@@ -1,7 +1,5 @@
 # impeller-zig
 
-[![Zig support](https://zig-support.dkx215417.workers.dev/0.16.0/0.15.2/0.15.1/badge.svg)](https://ziglang.org/download/)
-
 Zig wrapper for Impeller's standalone `impeller.h` API.
 
 Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/impeller-interop/impeller-sdk).
@@ -26,6 +24,10 @@ Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/imp
 - Windows + Vulkan
 - Zig wrappers for contexts, surfaces, paints, paths, textures, display lists, typography, and basic geometry
 - Flat domain modules such as `impeller.geometry`, `impeller.paint`, `impeller.path`, and `impeller.text`
+
+## Zig support
+
+[![Zig version support](https://zig-support.dkx215417.workers.dev/0.16.0/0.15.2/0.15.1/badge.svg)](https://ziglang.org/download/)
 
 ## Install
 
