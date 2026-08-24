@@ -130,3 +130,32 @@ pub fn handlesFromSlice(allocator: std.mem.Allocator, textures: []const Texture)
     }
     return handles;
 }
+
+test "texture descriptor" {
+    const descriptor = Descriptor.init(.rgba8888, .{ .width = 32, .height = 16 }, 4);
+    const converted = descriptor.toC();
+    try std.testing.expectEqual(descriptor.pixel_format.toC(), converted.pixel_format);
+    try std.testing.expectEqual(descriptor.size.toC(), converted.size);
+    try std.testing.expectEqual(descriptor.mip_count, converted.mip_count);
+}
+
+test "texture handles" {
+    const textures = [_]Texture{
+        .{ .handle = null },
+        .{ .handle = null },
+    };
+    const handles = try handlesFromSlice(std.testing.allocator, textures[0..]);
+    defer std.testing.allocator.free(handles);
+    try std.testing.expectEqual(@as(usize, 2), handles.len);
+    try std.testing.expectEqual(textures[0].handle, handles[0]);
+    try std.testing.expectEqual(textures[1].handle, handles[1]);
+}
+
+test "pixel format rejects unknown values" {
+    try std.testing.expectError(error.InvalidEnumTag, PixelFormat.fromC(999));
+}
+
+test "sampling" {
+    try std.testing.expectEqual(c.kImpellerTextureSamplingNearestNeighbor, Sampling.nearest_neighbor.toC());
+    try std.testing.expectEqual(c.kImpellerTextureSamplingLinear, Sampling.linear.toC());
+}

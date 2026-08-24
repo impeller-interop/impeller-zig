@@ -155,3 +155,51 @@ fn assertSameLayout(comptime Wrapper: type, comptime Raw: type) void {
     std.debug.assert(@sizeOf(Wrapper) == @sizeOf(Raw));
     std.debug.assert(@alignOf(Wrapper) == @alignOf(Raw));
 }
+
+test "geometry round trips" {
+    const point_value = Point{ .x = 1.5, .y = -2.5 };
+    try std.testing.expectEqual(point_value, Point.fromC(point_value.toC()));
+
+    const size_value = Size{ .width = 320.0, .height = 240.0 };
+    try std.testing.expectEqual(size_value, Size.fromC(size_value.toC()));
+
+    const pixel_size = ISize{ .width = -3, .height = 7 };
+    try std.testing.expectEqual(pixel_size, ISize.fromC(pixel_size.toC()));
+
+    const range_value = Range{ .start = 4, .end = 12 };
+    try std.testing.expectEqual(range_value, Range.fromC(.{ .start = 4, .end = 12 }));
+
+    const rect_value = rect(1.0, 2.0, 3.0, 4.0);
+    try std.testing.expectEqual(rect_value, Rect.fromC(rect_value.toC()));
+
+    const matrix_value = Matrix{ .m = [_]f32{1} ** 16 };
+    try std.testing.expectEqual(matrix_value, Matrix.fromC(matrix_value.toC()));
+}
+
+test "geometry constructors" {
+    try std.testing.expectEqual(ISize{ .width = 8, .height = 9 }, pixelSize(8, 9));
+    try std.testing.expectEqual(
+        RoundingRadii{
+            .top_left = point(6.0, 6.0),
+            .bottom_left = point(6.0, 6.0),
+            .top_right = point(6.0, 6.0),
+            .bottom_right = point(6.0, 6.0),
+        },
+        uniformRadii(6.0),
+    );
+
+    const values = [_]f32{0} ** 20;
+    try std.testing.expectEqual(values, colorMatrix(values).m);
+}
+
+test "radii conversion" {
+    const radii = RoundingRadii{
+        .top_left = point(1.0, 2.0),
+        .bottom_left = point(3.0, 4.0),
+        .top_right = point(5.0, 6.0),
+        .bottom_right = point(7.0, 8.0),
+    };
+    const converted = radii.toC();
+    try std.testing.expectEqual(radii.top_left.toC(), converted.top_left);
+    try std.testing.expectEqual(radii.bottom_right.toC(), converted.bottom_right);
+}

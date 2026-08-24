@@ -657,3 +657,50 @@ pub const GlyphInfo = struct {
         return TextDirection.fromC(c.ImpellerGlyphInfoGetTextDirection(self.handle));
     }
 };
+
+test "text enums" {
+    const weights = [_]FontWeight{ .thin, .normal, .bold, .black };
+    for (weights) |weight| {
+        try std.testing.expectEqual(@intFromEnum(weight), weight.toC());
+    }
+
+    const styles = [_]FontStyle{ .normal, .italic };
+    for (styles) |style| {
+        try std.testing.expectEqual(@intFromEnum(style), style.toC());
+    }
+
+    const alignments = [_]TextAlignment{ .left, .center, .justify, .start, .end };
+    for (alignments) |alignment| {
+        try std.testing.expectEqual(@intFromEnum(alignment), alignment.toC());
+    }
+
+    const directions = [_]TextDirection{ .rtl, .ltr };
+    for (directions) |direction| {
+        try std.testing.expectEqual(direction, try TextDirection.fromC(direction.toC()));
+    }
+    try std.testing.expectError(error.InvalidEnumTag, TextDirection.fromC(999));
+
+    const decoration_styles = [_]TextDecorationStyle{ .solid, .double, .dotted, .dashed, .wavy };
+    for (decoration_styles) |style| {
+        try std.testing.expectEqual(@intFromEnum(style), style.toC());
+    }
+}
+
+test "text decoration" {
+    try std.testing.expectEqual(@as(c_int, 0), TextDecorationType.none.toC());
+    try std.testing.expectEqual(@as(c_int, 1), text_decoration_types.underline.toC());
+    try std.testing.expectEqual(@as(c_int, 2), text_decoration_types.overline.toC());
+    try std.testing.expectEqual(@as(c_int, 4), text_decoration_types.line_through.toC());
+
+    const decoration = TextDecoration{
+        .types = .{ .underline = true, .line_through = true },
+        .color = color_mod.srgb(1.0, 0.0, 0.0, 0.5),
+        .style = .wavy,
+        .thickness_multiplier = 1.25,
+    };
+    const converted = decoration.toC();
+    try std.testing.expectEqual(@as(c_int, 5), converted.types);
+    try std.testing.expectEqual(decoration.color.red, converted.color.red);
+    try std.testing.expectEqual(@intFromEnum(decoration.style), converted.style);
+    try std.testing.expectEqual(decoration.thickness_multiplier, converted.thickness_multiplier);
+}
