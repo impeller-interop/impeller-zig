@@ -99,3 +99,32 @@ comptime {
     std.debug.assert(@sizeOf(VulkanInfo) == @sizeOf(c.ImpellerContextVulkanInfo));
     std.debug.assert(@alignOf(VulkanInfo) == @alignOf(c.ImpellerContextVulkanInfo));
 }
+
+test "Vulkan settings" {
+    const callback: VulkanProcAddressCallback = null;
+    const settings = VulkanSettings{
+        .user_data = null,
+        .proc_address_callback = callback,
+        .enable_validation = true,
+    };
+    const converted = settings.toC();
+    try std.testing.expectEqual(settings.user_data, converted.user_data);
+    try std.testing.expectEqual(settings.proc_address_callback, converted.proc_address_callback);
+    try std.testing.expectEqual(settings.enable_validation, converted.enable_vulkan_validation);
+}
+
+test "Vulkan info" {
+    const raw = c.ImpellerContextVulkanInfo{
+        .vk_instance = @ptrFromInt(1),
+        .vk_physical_device = @ptrFromInt(2),
+        .vk_logical_device = @ptrFromInt(3),
+        .graphics_queue_family_index = 4,
+        .graphics_queue_index = 5,
+    };
+    const value = VulkanInfo.fromC(raw);
+    try std.testing.expectEqual(raw.vk_instance, value.vk_instance);
+    try std.testing.expectEqual(raw.vk_physical_device, value.vk_physical_device);
+    try std.testing.expectEqual(raw.vk_logical_device, value.vk_logical_device);
+    try std.testing.expectEqual(raw.graphics_queue_family_index, value.graphics_queue_family_index);
+    try std.testing.expectEqual(raw.graphics_queue_index, value.graphics_queue_index);
+}

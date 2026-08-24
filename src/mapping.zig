@@ -91,3 +91,22 @@ pub const OwnedMapping = struct {
         allocator.destroy(release_state);
     }
 };
+
+test "mapping deinit" {
+    var owned = try OwnedMapping.copy(std.testing.allocator, "impeller");
+    owned.deinit();
+    owned.deinit();
+
+    try std.testing.expectEqual(@as(?*anyopaque, null), owned.release_state);
+    try std.testing.expectEqual(@as(?*anyopaque, null), owned.mapping.value.on_release);
+    try std.testing.expectEqual(@as(u64, 0), owned.mapping.value.length);
+}
+
+test "mapping transfer" {
+    var owned = try OwnedMapping.copy(std.testing.allocator, "impeller");
+    owned.releaseToImpeller();
+
+    try std.testing.expectEqual(@as(?*anyopaque, null), owned.release_state);
+    try std.testing.expectEqual(@as(?*anyopaque, null), owned.mapping.value.on_release);
+    try std.testing.expectEqual(@as(u64, 0), owned.mapping.value.length);
+}

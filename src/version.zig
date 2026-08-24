@@ -1,3 +1,4 @@
+const std = @import("std");
 const c = @import("impeller_c");
 const Error = @import("errors.zig").Error;
 
@@ -40,4 +41,17 @@ pub fn patchOf(version_value: u32) u32 {
 /// Verifies that the imported header version matches the linked runtime.
 pub fn check() Error!void {
     if (runtime() != value) return Error.VersionMismatch;
+}
+
+test "version round trips" {
+    const packed_version = make(3, 17, 231, 4095);
+    try std.testing.expectEqual(@as(u32, 3), variantOf(packed_version));
+    try std.testing.expectEqual(@as(u32, 17), majorOf(packed_version));
+    try std.testing.expectEqual(@as(u32, 231), minorOf(packed_version));
+    try std.testing.expectEqual(@as(u32, 4095), patchOf(packed_version));
+}
+
+test "runtime version" {
+    try check();
+    try std.testing.expectEqual(value, runtime());
 }

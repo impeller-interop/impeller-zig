@@ -1,3 +1,4 @@
+const std = @import("std");
 const c = @import("impeller_c");
 const Error = @import("errors.zig").Error;
 const geometry = @import("geometry.zig");
@@ -140,3 +141,8 @@ pub const Builder = struct {
         return .{ .handle = handle };
     }
 };
+
+test "fill types" {
+    try std.testing.expectEqual(c.kImpellerFillTypeNonZero, FillType.non_zero.toC());
+    try std.testing.expectEqual(c.kImpellerFillTypeOdd, FillType.odd.toC());
+}

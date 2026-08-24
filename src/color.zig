@@ -54,3 +54,30 @@ comptime {
     std.debug.assert(@sizeOf(Color) == @sizeOf(c.ImpellerColor));
     std.debug.assert(@alignOf(Color) == @alignOf(c.ImpellerColor));
 }
+
+test "color round trips" {
+    const colors = [_]Space{ .srgb, .extended_srgb, .display_p3 };
+    for (colors) |space| {
+        try std.testing.expectEqual(space, try Space.fromC(space.toC()));
+    }
+
+    const value = Color{
+        .red = 0.1,
+        .green = 0.2,
+        .blue = 0.3,
+        .alpha = 0.4,
+        .color_space = .display_p3,
+    };
+    const converted = value.toC();
+    try std.testing.expectEqual(value.red, converted.red);
+    try std.testing.expectEqual(value.green, converted.green);
+    try std.testing.expectEqual(value.blue, converted.blue);
+    try std.testing.expectEqual(value.alpha, converted.alpha);
+    try std.testing.expectEqual(value.color_space.toC(), converted.color_space);
+}
+
+test "color spaces" {
+    try std.testing.expectEqual(Space.srgb, spaces.srgb);
+    try std.testing.expectEqual(Space.extended_srgb, spaces.extended_srgb);
+    try std.testing.expectEqual(Space.display_p3, spaces.display_p3);
+}

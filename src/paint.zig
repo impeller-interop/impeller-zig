@@ -558,3 +558,35 @@ pub const MaskFilter = struct {
         return self.handle;
     }
 };
+
+test "paint enums" {
+    const blend_modes = [_]BlendMode{ .clear, .source_over, .plus, .luminosity };
+    for (blend_modes) |mode| {
+        try std.testing.expectEqual(@intFromEnum(mode), mode.toC());
+    }
+
+    const draw_styles = [_]DrawStyle{ .fill, .stroke, .stroke_and_fill };
+    for (draw_styles) |style| {
+        try std.testing.expectEqual(@intFromEnum(style), style.toC());
+    }
+
+    const caps = [_]StrokeCap{ .butt, .round, .square };
+    for (caps) |cap| {
+        try std.testing.expectEqual(@intFromEnum(cap), cap.toC());
+    }
+
+    const joins = [_]StrokeJoin{ .miter, .round, .bevel };
+    for (joins) |join| {
+        try std.testing.expectEqual(@intFromEnum(join), join.toC());
+    }
+
+    const tile_modes = [_]TileMode{ .clamp, .repeat, .mirror, .decal };
+    for (tile_modes) |mode| {
+        try std.testing.expectEqual(@intFromEnum(mode), mode.toC());
+    }
+
+    const blur_styles = [_]BlurStyle{ .normal, .solid, .outer, .inner };
+    for (blur_styles) |style| {
+        try std.testing.expectEqual(@intFromEnum(style), style.toC());
+    }
+}

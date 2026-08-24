@@ -1,3 +1,4 @@
+const std = @import("std");
 const c = @import("impeller_c");
 const Error = @import("errors.zig").Error;
 const geometry = @import("geometry.zig");
@@ -317,3 +318,8 @@ pub const Builder = struct {
         c.ImpellerDisplayListBuilderResetTransform(self.handle);
     }
 };
+
+test "clip operations" {
+    try std.testing.expectEqual(c.kImpellerClipOperationDifference, ClipOperation.difference.toC());
+    try std.testing.expectEqual(c.kImpellerClipOperationIntersect, ClipOperation.intersect.toC());
+}
