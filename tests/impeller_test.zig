@@ -482,21 +482,22 @@ test "display list state" {
     builder.scale(2.0, 3.0);
     builder.rotate(30.0);
     builder.translate(4.0, 5.0);
-    builder.transform(impeller.Matrix{ .m = [_]f32{
+    const transform = impeller.Matrix{ .m = [_]f32{
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
         1.0, 2.0, 0.0, 1.0,
-    } });
-    const current = builder.getTransform();
-    try std.testing.expect(current.m[0] != 0.0);
-    builder.setTransform(impeller.Matrix{ .m = [_]f32{
+    } };
+    builder.transform(transform);
+    builder.setTransform(transform);
+    try std.testing.expectEqual(transform, builder.getTransform());
+    builder.resetTransform();
+    try std.testing.expectEqual(impeller.Matrix{ .m = [_]f32{
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0,
-    } });
-    builder.resetTransform();
+    } }, builder.getTransform());
 
     var display_list = try builder.build();
     defer display_list.deinit();
@@ -583,10 +584,11 @@ test "paragraph layout" {
 
 test "resource clones" {
     var paint = try impeller.Paint.init();
-    defer paint.deinit();
     var paint_clone = paint.clone();
     defer paint_clone.deinit();
     try std.testing.expectEqual(paint.raw(), paint_clone.raw());
+    paint.deinit();
+    paint_clone.setColor(impeller.srgb(1.0, 0.0, 0.0, 1.0));
 
     var color_filter = try impeller.ColorFilter.initBlend(
         impeller.srgb(1.0, 1.0, 1.0, 1.0),
@@ -631,10 +633,11 @@ test "resource clones" {
 
     path_builder.addRect(impeller.rect(0.0, 0.0, 1.0, 1.0));
     var path = try path_builder.takePath(impeller.fill_types.non_zero);
-    defer path.deinit();
     var path_clone = path.clone();
     defer path_clone.deinit();
     try std.testing.expectEqual(path.raw(), path_clone.raw());
+    path.deinit();
+    try std.testing.expectEqual(impeller.rect(0.0, 0.0, 1.0, 1.0), path_clone.getBounds());
 
     var typography = try impeller.TypographyContext.init();
     defer typography.deinit();

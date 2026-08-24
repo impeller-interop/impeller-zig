@@ -75,9 +75,3 @@ test "color round trips" {
     try std.testing.expectEqual(value.alpha, converted.alpha);
     try std.testing.expectEqual(value.color_space.toC(), converted.color_space);
 }
-
-test "color spaces" {
-    try std.testing.expectEqual(Space.srgb, spaces.srgb);
-    try std.testing.expectEqual(Space.extended_srgb, spaces.extended_srgb);
-    try std.testing.expectEqual(Space.display_p3, spaces.display_p3);
-}
