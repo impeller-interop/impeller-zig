@@ -30,8 +30,8 @@ jobs:
           set -euo pipefail
 
           repo="https://github.com/impeller-interop/impeller-sdk.git"
-          new_sha="$(git ls-remote "$repo" refs/heads/stable | cut -f1)"
-          current_sha="$(grep -oP 'ref=stable#\K[0-9a-f]+' build.zig.zon | head -1)"
+          new_sha="$(git ls-remote "$repo" refs/heads/stable | cut -f1 || true)"
+          current_sha="$(grep -oP 'impeller-sdk\?ref=[^#"]+#\K[0-9a-f]{40}' build.zig.zon | head -1 || true)"
 
           echo "pinned=$current_sha"
           echo "latest=$new_sha"
