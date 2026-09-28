@@ -34,7 +34,7 @@ Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/imp
 Install the latest release:
 
 ```bash
-zig fetch --save git+https://github.com/impeller-interop/impeller-zig#v0.1.1
+zig fetch --save git+https://github.com/impeller-interop/impeller-zig#v0.1.2
 ```
 
 To follow the development branch instead:
