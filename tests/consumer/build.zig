@@ -10,6 +10,12 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    // dyld does not expand the ELF `$ORIGIN` token.
+    const runtime_search_path = switch (target.result.os.tag) {
+        .macos => "@executable_path",
+        else => "$ORIGIN",
+    };
+
     const app = b.addExecutable(.{
         .name = "app",
         .root_module = b.createModule(.{
@@ -21,7 +27,7 @@ pub fn build(b: *std.Build) void {
             },
         }),
     });
-    app.root_module.addRPathSpecial("$ORIGIN");
+    app.root_module.addRPathSpecial(runtime_search_path);
 
     const native = b.addExecutable(.{
         .name = "native",
@@ -32,7 +38,7 @@ pub fn build(b: *std.Build) void {
     });
     native.root_module.addCSourceFile(.{ .file = b.path("src/native.c") });
     native.root_module.link_libc = true;
-    native.root_module.addRPathSpecial("$ORIGIN");
+    native.root_module.addRPathSpecial(runtime_search_path);
 
     impeller_pkg.linkRuntime(app, dep);
     impeller_pkg.linkRuntime(native, dep);
