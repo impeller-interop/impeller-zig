@@ -22,3 +22,10 @@ jobs:
 
       - name: Run tests
         run: zig build test
+
+      - name: Check consumer package contract
+        working-directory: tests/consumer
+        run: |
+          zig build
+          ./zig-out/bin/app
+          ./zig-out/bin/native
