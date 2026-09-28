@@ -112,7 +112,7 @@ fn addRawModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.
         .c_source_file = sdk.header,
         .target = options.target,
         .optimize = options.optimize,
-        .warnings = .show,
+        .warnings = .ignore,
     });
     t.addIncludePath(sdk.include_path);
 
