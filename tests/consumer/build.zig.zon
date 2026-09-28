@@ -1,0 +1,16 @@
+.{
+    .name = .consumer,
+    .version = "0.0.0",
+    .fingerprint = 0x705b3727974ba60b,
+    .minimum_zig_version = "0.17.0-dev",
+    .dependencies = .{
+        .impeller_zig = .{
+            .path = "../..",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
