@@ -5,8 +5,8 @@ on:
   pull_request:
 
 jobs:
-  test:
-    name: Build and test
+  fmt:
+    name: Format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,12 +20,53 @@ jobs:
       - name: Check formatting
         run: zig fmt --check src tests
 
+  test:
+    name: Build and test (${{ matrix.platform }})
+    needs: fmt
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux x86_64
+            runs_on: ubuntu-latest
+          - platform: linux arm64
+            runs_on: ubuntu-24.04-arm
+          - platform: macOS x86_64
+            runs_on: macos-15-intel
+          - platform: macOS arm64
+            runs_on: macos-latest
+          - platform: windows x86_64
+            runs_on: windows-latest
+          - platform: windows arm64
+            runs_on: windows-11-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: master
+
       - name: Run tests
         run: zig build test
 
       - name: Check consumer package contract
         working-directory: tests/consumer
+        shell: bash
         run: |
           zig build
           ./zig-out/bin/app
           ./zig-out/bin/native
+
+  required:
+    name: Build and test
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every platform
+        env:
+          RESULT: ${{ needs.test.result }}
+        run: test "$RESULT" = "success"
