@@ -1,0 +1,41 @@
+!version 0.5
+
+[help] Run Unit Tests
+[pass] Tests passed.
+[fail] Tests failed.
+test():
+    zig build test
+
+[help] Check Consumer Package Contract
+[desc] Build and run consumer against the installed runtime.
+[pass] Consumer contract holds.
+[fail] Consumer contract failed.
+consumer():
+    | set -e
+    | cd tests/consumer
+    | zig build
+    | ./zig-out/bin/app
+    | ./zig-out/bin/native
+
+[help] Format
+[pass] Formatting complete.
+[fail] Formatting failed.
+fmt():
+    zig fmt src tests build.zig build.zig.zon
+
+[help] Check Formatting
+[pass] Formatting is clean.
+[fail] Formatting failed.
+fmt-check():
+    zig fmt --check src tests build.zig build.zig.zon
+
+[help] Clean Cache and Output
+[desc] Remove every build artifact, including the consumer package caches.
+[desc] zig-pkg is recreated from the global cache; tools headers come back from the fetch scripts.
+[pass] Clean complete.
+[fail] Clean failed.
+clean():
+    rm -rf .zig-cache zig-out zig-pkg
+    rm -rf tests/consumer/.zig-cache tests/consumer/zig-out tests/consumer/zig-pkg
+    rm -rf tools/__pycache__
+    rm -f tools/impeller_*.h tools/*.export.md
