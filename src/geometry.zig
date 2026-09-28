@@ -172,7 +172,7 @@ test "geometry round trips" {
     const rect_value = rect(1.0, 2.0, 3.0, 4.0);
     try std.testing.expectEqual(rect_value, Rect.fromC(rect_value.toC()));
 
-    const matrix_value = Matrix{ .m = [_]f32{1} ** 16 };
+    const matrix_value = Matrix{ .m = @splat(1) };
     try std.testing.expectEqual(matrix_value, Matrix.fromC(matrix_value.toC()));
 }
 
@@ -188,7 +188,7 @@ test "geometry constructors" {
         uniformRadii(6.0),
     );
 
-    const values = [_]f32{0} ** 20;
+    const values: [20]f32 = @splat(0);
     try std.testing.expectEqual(values, colorMatrix(values).m);
 }
 

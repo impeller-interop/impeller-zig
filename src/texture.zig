@@ -16,7 +16,7 @@ pub const PixelFormat = enum(c.ImpellerPixelFormat) {
     }
 
     pub fn toC(self: PixelFormat) c.ImpellerPixelFormat {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -25,7 +25,7 @@ pub const Sampling = enum(c.ImpellerTextureSampling) {
     linear = c.kImpellerTextureSamplingLinear,
 
     pub fn toC(self: Sampling) c.ImpellerTextureSampling {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 

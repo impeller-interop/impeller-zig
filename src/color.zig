@@ -11,7 +11,7 @@ pub const Space = enum(c.ImpellerColorSpace) {
     }
 
     pub fn toC(self: Space) c.ImpellerColorSpace {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 

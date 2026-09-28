@@ -48,7 +48,7 @@ pub const BlendMode = enum(c.ImpellerBlendMode) {
     luminosity = c.kImpellerBlendModeLuminosity,
 
     pub fn toC(self: BlendMode) c.ImpellerBlendMode {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -58,7 +58,7 @@ pub const DrawStyle = enum(c.ImpellerDrawStyle) {
     stroke_and_fill = c.kImpellerDrawStyleStrokeAndFill,
 
     pub fn toC(self: DrawStyle) c.ImpellerDrawStyle {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -68,7 +68,7 @@ pub const StrokeCap = enum(c.ImpellerStrokeCap) {
     square = c.kImpellerStrokeCapSquare,
 
     pub fn toC(self: StrokeCap) c.ImpellerStrokeCap {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -78,7 +78,7 @@ pub const StrokeJoin = enum(c.ImpellerStrokeJoin) {
     bevel = c.kImpellerStrokeJoinBevel,
 
     pub fn toC(self: StrokeJoin) c.ImpellerStrokeJoin {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -89,7 +89,7 @@ pub const TileMode = enum(c.ImpellerTileMode) {
     decal = c.kImpellerTileModeDecal,
 
     pub fn toC(self: TileMode) c.ImpellerTileMode {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -100,7 +100,7 @@ pub const BlurStyle = enum(c.ImpellerBlurStyle) {
     inner = c.kImpellerBlurStyleInner,
 
     pub fn toC(self: BlurStyle) c.ImpellerBlurStyle {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -562,31 +562,31 @@ pub const MaskFilter = struct {
 test "paint enums" {
     const blend_modes = [_]BlendMode{ .clear, .source_over, .plus, .luminosity };
     for (blend_modes) |mode| {
-        try std.testing.expectEqual(@intFromEnum(mode), mode.toC());
+        try std.testing.expectEqual(@backingInt(mode), mode.toC());
     }
 
     const draw_styles = [_]DrawStyle{ .fill, .stroke, .stroke_and_fill };
     for (draw_styles) |style| {
-        try std.testing.expectEqual(@intFromEnum(style), style.toC());
+        try std.testing.expectEqual(@backingInt(style), style.toC());
     }
 
     const caps = [_]StrokeCap{ .butt, .round, .square };
     for (caps) |cap| {
-        try std.testing.expectEqual(@intFromEnum(cap), cap.toC());
+        try std.testing.expectEqual(@backingInt(cap), cap.toC());
     }
 
     const joins = [_]StrokeJoin{ .miter, .round, .bevel };
     for (joins) |join| {
-        try std.testing.expectEqual(@intFromEnum(join), join.toC());
+        try std.testing.expectEqual(@backingInt(join), join.toC());
     }
 
     const tile_modes = [_]TileMode{ .clamp, .repeat, .mirror, .decal };
     for (tile_modes) |mode| {
-        try std.testing.expectEqual(@intFromEnum(mode), mode.toC());
+        try std.testing.expectEqual(@backingInt(mode), mode.toC());
     }
 
     const blur_styles = [_]BlurStyle{ .normal, .solid, .outer, .inner };
     for (blur_styles) |style| {
-        try std.testing.expectEqual(@intFromEnum(style), style.toC());
+        try std.testing.expectEqual(@backingInt(style), style.toC());
     }
 }

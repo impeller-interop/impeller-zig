@@ -34,7 +34,7 @@ pub const FontWeight = enum(c.ImpellerFontWeight) {
     pub const w900 = FontWeight.black;
 
     pub fn toC(self: FontWeight) c.ImpellerFontWeight {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -43,7 +43,7 @@ pub const FontStyle = enum(c.ImpellerFontStyle) {
     italic = c.kImpellerFontStyleItalic,
 
     pub fn toC(self: FontStyle) c.ImpellerFontStyle {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -56,7 +56,7 @@ pub const TextAlignment = enum(c.ImpellerTextAlignment) {
     end = c.kImpellerTextAlignmentEnd,
 
     pub fn toC(self: TextAlignment) c.ImpellerTextAlignment {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -69,7 +69,7 @@ pub const TextDirection = enum(c.ImpellerTextDirection) {
     }
 
     pub fn toC(self: TextDirection) c.ImpellerTextDirection {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -81,7 +81,7 @@ pub const TextDecorationStyle = enum(c.ImpellerTextDecorationStyle) {
     wavy = c.kImpellerTextDecorationStyleWavy,
 
     pub fn toC(self: TextDecorationStyle) c.ImpellerTextDecorationStyle {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
@@ -661,17 +661,17 @@ pub const GlyphInfo = struct {
 test "text enums" {
     const weights = [_]FontWeight{ .thin, .normal, .bold, .black };
     for (weights) |weight| {
-        try std.testing.expectEqual(@intFromEnum(weight), weight.toC());
+        try std.testing.expectEqual(@backingInt(weight), weight.toC());
     }
 
     const styles = [_]FontStyle{ .normal, .italic };
     for (styles) |style| {
-        try std.testing.expectEqual(@intFromEnum(style), style.toC());
+        try std.testing.expectEqual(@backingInt(style), style.toC());
     }
 
     const alignments = [_]TextAlignment{ .left, .center, .justify, .start, .end };
     for (alignments) |alignment| {
-        try std.testing.expectEqual(@intFromEnum(alignment), alignment.toC());
+        try std.testing.expectEqual(@backingInt(alignment), alignment.toC());
     }
 
     const directions = [_]TextDirection{ .rtl, .ltr };
@@ -682,7 +682,7 @@ test "text enums" {
 
     const decoration_styles = [_]TextDecorationStyle{ .solid, .double, .dotted, .dashed, .wavy };
     for (decoration_styles) |style| {
-        try std.testing.expectEqual(@intFromEnum(style), style.toC());
+        try std.testing.expectEqual(@backingInt(style), style.toC());
     }
 }
 
@@ -701,6 +701,6 @@ test "text decoration" {
     const converted = decoration.toC();
     try std.testing.expectEqual(@as(c_int, 5), converted.types);
     try std.testing.expectEqual(decoration.color.red, converted.color.red);
-    try std.testing.expectEqual(@intFromEnum(decoration.style), converted.style);
+    try std.testing.expectEqual(@backingInt(decoration.style), converted.style);
     try std.testing.expectEqual(decoration.thickness_multiplier, converted.thickness_multiplier);
 }

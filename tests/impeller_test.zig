@@ -141,10 +141,10 @@ test "sentinel string APIs" {
         const set_ellipsis = @typeInfo(@TypeOf(impeller.ParagraphStyle.setEllipsis)).@"fn";
         const register_font = @typeInfo(@TypeOf(impeller.TypographyContext.registerFontBorrowed)).@"fn";
 
-        std.debug.assert(set_font_family.params[1].type.? == [:0]const u8);
-        std.debug.assert(set_locale.params[1].type.? == [:0]const u8);
-        std.debug.assert(set_ellipsis.params[1].type.? == ?[:0]const u8);
-        std.debug.assert(register_font.params[2].type.? == ?[:0]const u8);
+        std.debug.assert(set_font_family.param_types[1].? == [:0]const u8);
+        std.debug.assert(set_locale.param_types[1].? == [:0]const u8);
+        std.debug.assert(set_ellipsis.param_types[1].? == ?[:0]const u8);
+        std.debug.assert(register_font.param_types[2].? == ?[:0]const u8);
     }
 }
 
@@ -393,7 +393,7 @@ test "filters" {
     var composed = try impeller.ImageFilter.initCompose(dilate, erode);
     defer composed.deinit();
 
-    var color_filter = try impeller.ColorFilter.initColorMatrix(impeller.colorMatrix([_]f32{1.0} ** 20));
+    var color_filter = try impeller.ColorFilter.initColorMatrix(impeller.colorMatrix(@splat(1.0)));
     defer color_filter.deinit();
     var mask_filter = try impeller.MaskFilter.initBlur(impeller.blur_styles.outer, 2.0);
     defer mask_filter.deinit();

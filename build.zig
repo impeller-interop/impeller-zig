@@ -1,4 +1,5 @@
 const std = @import("std");
+const Translator = @import("translate_c").Translator;
 
 const BuildOptions = struct {
     target: std.Build.ResolvedTarget,
@@ -11,6 +12,19 @@ const SdkPaths = struct {
     lib_path: std.Build.LazyPath,
     runtime_library: std.Build.LazyPath,
     windows_import_library: ?std.Build.LazyPath,
+
+    fn fromDependency(dep: *std.Build.Dependency, target: std.Target) SdkPaths {
+        return .{
+            .header = dep.namedLazyPath("impeller_header"),
+            .include_path = dep.namedLazyPath("impeller_include"),
+            .lib_path = dep.namedLazyPath("impeller_lib_dir"),
+            .runtime_library = dep.namedLazyPath("impeller_library"),
+            .windows_import_library = if (target.os.tag == .windows)
+                dep.namedLazyPath("impeller_import_library")
+            else
+                null,
+        };
+    }
 };
 
 pub fn build(b: *std.Build) void {
@@ -28,21 +42,44 @@ pub fn build(b: *std.Build) void {
     addTests(b, options, sdk, mod);
 }
 
+/// Link the Impeller runtime to a final compile step.
+pub fn linkRuntime(compile_step: *std.Build.Step.Compile, dep: *std.Build.Dependency) void {
+    const target = compile_step.rootModuleTarget();
+    const sdk = SdkPaths.fromDependency(dep, target);
+    linkSdk(compile_step.root_module, sdk, target);
+}
+
+/// Install the Impeller runtime to a selected install directory.
+pub fn installRuntime(options: struct {
+    compile_step: *std.Build.Step.Compile,
+    dependency: *std.Build.Dependency,
+    install_dir: std.Build.InstallDir = .bin,
+}) *std.Build.Step {
+    const compile_step = options.compile_step;
+    const b = compile_step.step.owner;
+    const target = compile_step.rootModuleTarget();
+    const sdk = SdkPaths.fromDependency(options.dependency, target);
+
+    const runtime_file_name = switch (target.os.tag) {
+        .windows => "impeller.dll",
+        .macos => "libimpeller.dylib",
+        .linux => "libimpeller.so",
+        else => @panic("unsupported Impeller SDK target"),
+    };
+
+    return &b.addInstallFileWithDir(
+        sdk.runtime_library,
+        options.install_dir,
+        runtime_file_name,
+    ).step;
+}
+
 fn getSdk(b: *std.Build, options: BuildOptions) SdkPaths {
     const dep = b.dependency("impeller_sdk", .{
         .target = options.target,
     });
 
-    return .{
-        .header = dep.namedLazyPath("impeller_header"),
-        .include_path = dep.namedLazyPath("impeller_include"),
-        .lib_path = dep.namedLazyPath("impeller_lib_dir"),
-        .runtime_library = dep.namedLazyPath("impeller_library"),
-        .windows_import_library = if (options.target.result.os.tag == .windows)
-            dep.namedLazyPath("impeller_import_library")
-        else
-            null,
-    };
+    return .fromDependency(dep, options.target.result);
 }
 
 fn exposeSdk(b: *std.Build, sdk: SdkPaths) void {
@@ -57,7 +94,7 @@ fn exposeSdk(b: *std.Build, sdk: SdkPaths) void {
 
 fn addModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.Module {
     const impeller_c = addRawModule(b, options, sdk);
-    const mod = b.addModule("impeller", .{
+    return b.addModule("impeller", .{
         .root_source_file = b.path("src/impeller.zig"),
         .target = options.target,
         .optimize = options.optimize,
@@ -65,7 +102,21 @@ fn addModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.Mod
             .{ .name = "impeller_c", .module = impeller_c },
         },
     });
-    return mod;
+}
+
+fn addRawModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.Module {
+    const translate_c = b.dependency("translate_c", .{});
+
+    const t: Translator = .init(translate_c, .{
+        .name = "impeller_c",
+        .c_source_file = sdk.header,
+        .target = options.target,
+        .optimize = options.optimize,
+        .warnings = .show,
+    });
+    t.addIncludePath(sdk.include_path);
+
+    return t.mod;
 }
 
 fn addTests(b: *std.Build, options: BuildOptions, sdk: SdkPaths, mod: *std.Build.Module) void {
@@ -84,20 +135,10 @@ fn addTests(b: *std.Build, options: BuildOptions, sdk: SdkPaths, mod: *std.Build
     linkSdk(tests.root_module, sdk, options.target.result);
 
     const run_tests = b.addRunArtifact(tests);
-    addRuntimePath(run_tests, sdk);
+    addRuntimePath(run_tests, sdk, options.target.result);
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_tests.step);
-}
-
-fn addRawModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.Module {
-    const translate = b.addTranslateC(.{
-        .root_source_file = sdk.header,
-        .target = options.target,
-        .optimize = options.optimize,
-    });
-    translate.addIncludePath(sdk.include_path);
-    return translate.createModule();
 }
 
 fn linkSdk(mod: *std.Build.Module, sdk: SdkPaths, target: std.Target) void {
@@ -109,64 +150,36 @@ fn linkSdk(mod: *std.Build.Module, sdk: SdkPaths, target: std.Target) void {
     }
 }
 
-/// Link the Impeller runtime to a final compile step.
-pub fn linkRuntime(compile_step: *std.Build.Step.Compile, dep: *std.Build.Dependency) void {
-    const sdk = sdkFromDependency(dep, compile_step.rootModuleTarget());
-    linkSdk(compile_step.root_module, sdk, compile_step.rootModuleTarget());
-}
-
-/// Install the Impeller runtime to a selected install directory.
-pub fn installRuntime(options: struct {
-    compile_step: *std.Build.Step.Compile,
-    dependency: *std.Build.Dependency,
-    install_dir: std.Build.InstallDir = .bin,
-}) *std.Build.Step {
-    const compile_step = options.compile_step;
-    const b = compile_step.step.owner;
-    const target = compile_step.rootModuleTarget();
-    const sdk = sdkFromDependency(options.dependency, target);
-    const install_step = b.step("install-impeller-runtime", "Install Impeller runtime library");
+fn addRuntimePath(run: *std.Build.Step.Run, sdk: SdkPaths, target: std.Target) void {
+    const b = run.step.owner;
+    const lib_path = lazyPathString(sdk.lib_path);
 
     switch (target.os.tag) {
-        .windows => install_step.dependOn(&b.addInstallFileWithDir(
-            sdk.runtime_library,
-            options.install_dir,
-            "impeller.dll",
-        ).step),
-        .macos => install_step.dependOn(&b.addInstallFileWithDir(
-            sdk.runtime_library,
-            options.install_dir,
-            "libimpeller.dylib",
-        ).step),
-        .linux => {
-            install_step.dependOn(&b.addInstallFileWithDir(
-                sdk.runtime_library,
-                options.install_dir,
-                "libimpeller.so",
-            ).step);
+        .macos => run.setEnvironmentVariable("DYLD_LIBRARY_PATH", lib_path),
+        .windows => {
+            const old_path = run.getEnvMap().get("PATH");
+            if (old_path) |prev_path| {
+                run.setEnvironmentVariable("PATH", b.fmt("{s}{c}{s}", .{ prev_path, std.fs.path.delimiter, lib_path }));
+            } else {
+                run.setEnvironmentVariable("PATH", lib_path);
+            }
         },
+        .linux => run.setEnvironmentVariable("LD_LIBRARY_PATH", lib_path),
         else => @panic("unsupported Impeller SDK target"),
     }
-
-    return install_step;
 }
 
-fn sdkFromDependency(dep: *std.Build.Dependency, target: std.Target) SdkPaths {
-    return .{
-        .header = dep.namedLazyPath("impeller_header"),
-        .include_path = dep.namedLazyPath("impeller_include"),
-        .lib_path = dep.namedLazyPath("impeller_lib_dir"),
-        .runtime_library = dep.namedLazyPath("impeller_library"),
-        .windows_import_library = if (target.os.tag == .windows)
-            dep.namedLazyPath("impeller_import_library")
-        else
-            null,
+fn lazyPathString(lazy_path: std.Build.LazyPath) []const u8 {
+    return switch (lazy_path) {
+        .cwd_relative => |path| path,
+        .src_path => |src_path| src_path.owner.root.joinString(
+            src_path.owner.allocator,
+            src_path.sub_path,
+        ) catch @panic("OOM"),
+        .dependency => |dep| dep.dependency.builder.root.joinString(
+            dep.dependency.builder.allocator,
+            dep.sub_path,
+        ) catch @panic("OOM"),
+        .generated, .relative => @panic("expected a file system path"),
     };
-}
-
-fn addRuntimePath(run: *std.Build.Step.Run, sdk: SdkPaths) void {
-    const lib_path = sdk.lib_path.getPath2(run.step.owner, &run.step);
-    run.setEnvironmentVariable("DYLD_LIBRARY_PATH", lib_path);
-    run.setEnvironmentVariable("LD_LIBRARY_PATH", lib_path);
-    run.addPathDir(lib_path);
 }

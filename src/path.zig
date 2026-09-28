@@ -12,7 +12,7 @@ pub const FillType = enum(c.ImpellerFillType) {
     odd = c.kImpellerFillTypeOdd,
 
     pub fn toC(self: FillType) c.ImpellerFillType {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 

@@ -25,7 +25,7 @@ pub const ClipOperation = enum(c.ImpellerClipOperation) {
     intersect = c.kImpellerClipOperationIntersect,
 
     pub fn toC(self: ClipOperation) c.ImpellerClipOperation {
-        return @intFromEnum(self);
+        return @backingInt(self);
     }
 };
 
