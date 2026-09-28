@@ -27,20 +27,20 @@ Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/imp
 
 ## Zig support
 
-[![Zig version support](https://zig-support.dkx215417.workers.dev/0.16.0/0.15.2/0.15.1/badge.svg)](https://ziglang.org/download/)
+[![Zig version support](https://zig-support.dkx215417.workers.dev/master/0.16.0/0.15.2/0.15.1/badge.svg)](https://ziglang.org/download/)
 
 ## Install
 
-Install the latest release:
-
-```bash
-zig fetch --save git+https://github.com/impeller-interop/impeller-zig#v0.1.2
-```
-
-To follow the development branch instead:
+`main` tracks Zig master (`0.17.0-dev`):
 
 ```bash
 zig fetch --save git+https://github.com/impeller-interop/impeller-zig#main
+```
+
+To use the stable Zig `0.16.0` toolchain, install the `v0.1.2` release instead:
+
+```bash
+zig fetch --save git+https://github.com/impeller-interop/impeller-zig#v0.1.2
 ```
 
 Add the dependency in `build.zig`:
