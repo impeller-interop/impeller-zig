@@ -5,12 +5,15 @@ Zig wrapper for Impeller's standalone `impeller.h` API.
 Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/impeller-interop/impeller-sdk).
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f143b456-1d55-4309-9817-6b53f7ab2ccb" height="300"/>
-  <img src="https://github.com/user-attachments/assets/71ce96fe-fbe4-4195-aa36-aeee224b3830" height="300"/>
+  <img width="30%" alt="macos" src="https://github.com/user-attachments/assets/02905434-18fe-4ce8-a45f-ad320b8e3916" />
+  &nbsp;&nbsp;
+  <img width="30%" alt="linux" src="https://github.com/user-attachments/assets/57751a2e-e3a6-4531-a346-f8bfb1fdcdc0" />
+  &nbsp;&nbsp;
+  <img width="30%" alt="windows" src="https://github.com/user-attachments/assets/b25b9830-e3b1-4384-91bf-a139aaea027a" />
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/883936cf-6c3b-40b6-a34a-0d6c7388b7cc" width="700"/>
+  <img src="https://github.com/user-attachments/assets/883936cf-6c3b-40b6-a34a-0d6c7388b7cc" width="60%" />
 </p>
 
 <p align="center">
@@ -35,6 +38,12 @@ Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/imp
 
 ```bash
 zig fetch --save git+https://github.com/impeller-interop/impeller-zig#main
+```
+
+To pin the master-tracking release instead of `main`:
+
+```bash
+zig fetch --save git+https://github.com/impeller-interop/impeller-zig#v0.2.0
 ```
 
 To use the stable Zig `0.16.0` toolchain, install the `v0.1.2` release instead:
