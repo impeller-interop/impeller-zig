@@ -120,6 +120,16 @@ fn addRawModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.
 }
 
 fn addTests(b: *std.Build, options: BuildOptions, sdk: SdkPaths, mod: *std.Build.Module) void {
+    const test_filter = b.option([]const u8, "test-filter", "Run only tests whose name contains one of these comma separated substrings");
+
+    var filters: []const []const u8 = &.{};
+    if (test_filter) |spec| {
+        var list: std.ArrayList([]const u8) = .empty;
+        var parts = std.mem.splitScalar(u8, spec, ',');
+        while (parts.next()) |part| list.append(b.allocator, part) catch @panic("OOM");
+        filters = list.toOwnedSlice(b.allocator) catch @panic("OOM");
+    }
+
     const test_mod = b.createModule(.{
         .root_source_file = b.path("tests/impeller_test.zig"),
         .target = options.target,
@@ -131,6 +141,7 @@ fn addTests(b: *std.Build, options: BuildOptions, sdk: SdkPaths, mod: *std.Build
 
     const tests = b.addTest(.{
         .root_module = test_mod,
+        .filters = filters,
     });
     linkSdk(tests.root_module, sdk, options.target.result);
 
@@ -139,6 +150,10 @@ fn addTests(b: *std.Build, options: BuildOptions, sdk: SdkPaths, mod: *std.Build
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_tests.step);
+
+    const install_tests = b.addInstallArtifact(tests, .{});
+    const test_exe_step = b.step("test-exe", "Install the unit test binary");
+    test_exe_step.dependOn(&install_tests.step);
 }
 
 fn linkSdk(mod: *std.Build.Module, sdk: SdkPaths, target: std.Target) void {
