@@ -508,9 +508,12 @@ pub const Paragraph = struct {
         return Range.fromC(range);
     }
 
-    /// Returns cached line metrics for this paragraph.
+    /// Returns the line metrics of the paragraph.
+    ///
+    /// Impeller hands out a borrow of its cached metrics, so retain to own a reference.
     pub fn getLineMetrics(self: Paragraph) Error!LineMetrics {
         const handle = c.ImpellerParagraphGetLineMetrics(self.handle) orelse return Error.CreateLineMetricsFailed;
+        c.ImpellerLineMetricsRetain(handle);
         return .{ .handle = handle };
     }
 
