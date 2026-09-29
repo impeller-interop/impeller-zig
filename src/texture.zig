@@ -77,7 +77,7 @@ pub const Texture = struct {
     }
 
     /// Copies tightly packed, decompressed pixel bytes and transfers cleanup to Impeller.
-    /// The allocator must remain valid until the release callback has run.
+    /// The allocator must remain valid until Impeller runs the release callback.
     pub fn initWithBytesCopy(
         context: Context,
         descriptor: Descriptor,

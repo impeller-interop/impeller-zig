@@ -74,6 +74,9 @@ pub const OwnedMapping = struct {
     }
 
     /// Transfers cleanup responsibility after the receiving Impeller API succeeds.
+    ///
+    /// Impeller decides when the release callback runs and may never run it, as
+    /// documented for registered fonts, in which case the bytes stay allocated.
     pub fn releaseToImpeller(self: *OwnedMapping) void {
         self.release_state = null;
         self.mapping = Mapping.borrowed("");

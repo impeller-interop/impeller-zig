@@ -420,7 +420,7 @@ pub const FragmentProgram = struct {
     }
 
     /// Copies impellerc-compiled bytes and transfers cleanup to Impeller.
-    /// The allocator must remain valid until the release callback has run.
+    /// The allocator must remain valid until Impeller runs the release callback.
     pub fn initCopy(allocator: std.mem.Allocator, data: []const u8) Error!FragmentProgram {
         var owned = try OwnedMapping.copy(allocator, data);
         errdefer owned.deinit();

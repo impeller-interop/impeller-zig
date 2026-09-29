@@ -247,7 +247,7 @@ pub const TypographyContext = struct {
     }
 
     /// Copies font bytes and transfers cleanup to Impeller on successful registration.
-    /// The allocator must remain valid until the release callback has run.
+    /// Impeller may never run the release callback, which leaves the bytes allocated.
     pub fn registerFontCopy(
         self: TypographyContext,
         allocator: std.mem.Allocator,
