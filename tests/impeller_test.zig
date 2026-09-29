@@ -1,6 +1,9 @@
 const std = @import("std");
 const impeller = @import("impeller");
 
+/// Subset of Tiny5, see tests/fonts/README.md.
+const test_font = @embedFile("fonts/test-font.ttf");
+
 test "public declarations compile" {
     std.testing.refAllDecls(impeller);
     std.testing.refAllDecls(impeller.geometry);
@@ -580,6 +583,28 @@ test "paragraph layout" {
     _ = glyph.getGraphemeClusterBounds();
     _ = glyph.isEllipsis();
     _ = try glyph.getTextDirection();
+}
+
+test "registered font" {
+    var typography = try impeller.TypographyContext.init();
+    defer typography.deinit();
+    try typography.registerFontBorrowed(test_font, "ImpellerTestFont");
+
+    var style = try impeller.ParagraphStyle.init();
+    defer style.deinit();
+    style.setFontFamily("ImpellerTestFont");
+    style.setFontSize(16.0);
+
+    var builder = try impeller.ParagraphBuilder.init(typography);
+    defer builder.deinit();
+    builder.pushStyle(style);
+    builder.addText("Impeller Zig");
+    builder.popStyle();
+
+    var paragraph = try builder.build(160.0);
+    defer paragraph.deinit();
+    try std.testing.expect(paragraph.getLineCount() >= 1);
+    try std.testing.expect(paragraph.getHeight() > 0.0);
 }
 
 test "resource clones" {
