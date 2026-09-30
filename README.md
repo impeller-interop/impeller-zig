@@ -43,7 +43,7 @@ zig fetch --save git+https://github.com/impeller-interop/impeller-zig#main
 To pin the master-tracking release instead of `main`:
 
 ```bash
-zig fetch --save git+https://github.com/impeller-interop/impeller-zig#v0.2.0
+zig fetch --save git+https://github.com/impeller-interop/impeller-zig#v0.2.1
 ```
 
 To use the stable Zig `0.16.0` toolchain, install the `v0.1.2` release instead:
