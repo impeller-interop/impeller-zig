@@ -1,5 +1,4 @@
 const std = @import("std");
-const Translator = @import("translate_c").Translator;
 
 const BuildOptions = struct {
     target: std.Build.ResolvedTarget,
@@ -105,18 +104,14 @@ fn addModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.Mod
 }
 
 fn addRawModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.Module {
-    const translate_c = b.dependency("translate_c", .{});
-
-    const t: Translator = .init(translate_c, .{
-        .name = "impeller_c",
-        .c_source_file = sdk.header,
+    const translate_c = b.addTranslateC(.{
+        .root_source_file = sdk.header,
         .target = options.target,
         .optimize = options.optimize,
-        .warnings = .ignore,
     });
-    t.addIncludePath(sdk.include_path);
+    translate_c.addIncludePath(sdk.include_path);
 
-    return t.mod;
+    return translate_c.createModule();
 }
 
 fn addTests(b: *std.Build, options: BuildOptions, sdk: SdkPaths, mod: *std.Build.Module) void {
