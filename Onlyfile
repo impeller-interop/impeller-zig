@@ -11,11 +11,8 @@ test():
 [pass] Consumer contract holds.
 [fail] Consumer contract failed.
 consumer():
-    | set -e
     | cd tests/consumer
-    | zig build
-    | ./zig-out/bin/app
-    | ./zig-out/bin/native
+    | zig build run
 
 [help] Format
 [pass] Formatting complete.

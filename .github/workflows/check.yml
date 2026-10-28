@@ -55,10 +55,7 @@ jobs:
       - name: Check consumer package contract
         working-directory: tests/consumer
         shell: bash
-        run: |
-          zig build
-          ./zig-out/bin/app
-          ./zig-out/bin/native
+        run: zig build run
 
   required:
     name: Build and test

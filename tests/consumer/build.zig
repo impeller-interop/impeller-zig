@@ -28,21 +28,38 @@ pub fn build(b: *std.Build) void {
         }),
     });
     app.root_module.addRPathSpecial(runtime_search_path);
+    const install_step = b.getInstallStep();
 
-    b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
+    const install_runtime = impeller_pkg.installRuntime(.{
         .compile_step = app,
         .dependency = dep,
-    }));
-    b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
+    });
+
+    install_step.dependOn(install_runtime);
+
+    install_step.dependOn(impeller_pkg.installRuntime(.{
         .compile_step = app,
         .dependency = dep,
         .install_dir = .lib,
     }));
-    b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
+
+    install_step.dependOn(impeller_pkg.installRuntime(.{
         .compile_step = app,
         .dependency = dep,
         .install_dir = .{ .custom = "runtime" },
     }));
 
-    b.installArtifact(app);
+    const install_app = b.addInstallArtifact(app, .{});
+    install_step.dependOn(&install_app.step);
+
+    const installed_app_path = switch (target.result.os.tag) {
+        .windows => "zig-out/bin/app.exe",
+        else => "zig-out/bin/app",
+    };
+    const run_app = b.addRunFile(b.path(installed_app_path));
+    run_app.step.dependOn(&install_app.step);
+    run_app.step.dependOn(install_runtime);
+
+    const run_step = b.step("run", "Run consumer");
+    run_step.dependOn(&run_app.step);
 }
