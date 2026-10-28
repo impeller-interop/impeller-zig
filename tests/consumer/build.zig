@@ -29,26 +29,12 @@ pub fn build(b: *std.Build) void {
     });
     app.root_module.addRPathSpecial(runtime_search_path);
 
-    const native = b.addExecutable(.{
-        .name = "native",
-        .root_module = b.createModule(.{
-            .target = target,
-            .optimize = optimize,
-        }),
-    });
-    native.root_module.addCSourceFile(.{ .file = b.path("src/native.c") });
-    native.root_module.link_libc = true;
-    native.root_module.addRPathSpecial(runtime_search_path);
-
-    impeller_pkg.linkRuntime(app, dep);
-    impeller_pkg.linkRuntime(native, dep);
-
     b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
         .compile_step = app,
         .dependency = dep,
     }));
     b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
-        .compile_step = native,
+        .compile_step = app,
         .dependency = dep,
         .install_dir = .lib,
     }));
@@ -59,11 +45,4 @@ pub fn build(b: *std.Build) void {
     }));
 
     b.installArtifact(app);
-    b.installArtifact(native);
-
-    b.getInstallStep().dependOn(&b.addInstallDirectory(.{
-        .source_dir = dep.namedLazyPath("impeller_include"),
-        .install_dir = .prefix,
-        .install_subdir = "include",
-    }).step);
 }
