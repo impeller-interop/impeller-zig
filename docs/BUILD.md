@@ -33,14 +33,13 @@ const exe_mod = b.createModule(.{
 });
 ```
 
-`linkRuntime()` and `installRuntime()` do different work:
+The `impeller` module carries its SDK link input transitively. Zig applications
+that import `impeller` do not need a separate link step.
 
-| API | Purpose |
-| --- | --- |
-| `linkRuntime()` | Links the final executable or test artifact against the Impeller runtime. |
-| `installRuntime()` | Copies the Impeller runtime library into the install prefix. |
+`installRuntime()` copies the Impeller runtime library into the install prefix.
 
-Most applications need both:
+For a Zig application, install the runtime; configure a matching runtime
+search path as shown below:
 
 ```zig
 const exe = b.addExecutable(.{
@@ -48,7 +47,6 @@ const exe = b.addExecutable(.{
     .root_module = exe_mod,
 });
 
-impeller_pkg.linkRuntime(exe, impeller_dep);
 b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
     .compile_step = exe,
     .dependency = impeller_dep,
@@ -94,7 +92,6 @@ The install directory and runtime search path must match.
 Linux:
 
 ```zig
-impeller_pkg.linkRuntime(exe, impeller_dep);
 exe.root_module.addRPathSpecial("$ORIGIN/../lib");
 
 b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
@@ -107,7 +104,6 @@ b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
 macOS:
 
 ```zig
-impeller_pkg.linkRuntime(exe, impeller_dep);
 exe.root_module.addRPathSpecial("@executable_path/../lib");
 
 b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
@@ -122,7 +118,6 @@ b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
 Linux:
 
 ```zig
-impeller_pkg.linkRuntime(exe, impeller_dep);
 exe.root_module.addRPathSpecial("$ORIGIN/../runtime");
 
 b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
@@ -135,7 +130,6 @@ b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
 macOS:
 
 ```zig
-impeller_pkg.linkRuntime(exe, impeller_dep);
 exe.root_module.addRPathSpecial("@executable_path/../runtime");
 
 b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{

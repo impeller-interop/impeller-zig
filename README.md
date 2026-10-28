@@ -76,8 +76,7 @@ const exe = b.addExecutable(.{
     .root_module = exe_mod,
 });
 
-// Link libimpeller and copy it beside the executable.
-impeller_pkg.linkRuntime(exe, impeller_dep);
+// Copy libimpeller beside the executable.
 b.getInstallStep().dependOn(impeller_pkg.installRuntime(.{
     .compile_step = exe,
     .dependency = impeller_dep,
@@ -113,7 +112,8 @@ defer fill.deinit();
 
 Use the `impeller.c` namespace only when you need raw C functions that are not wrapped yet.
 
-The runtime link step is explicit so projects that only import the package without using Impeller do not load `libimpeller`.
+The `impeller` module carries its SDK link input automatically. Applications
+still need `installRuntime()` and a matching runtime search path for deployment.
 
 For custom runtime install layouts and rpath setup, see [BUILD.md](docs/BUILD.md).
 

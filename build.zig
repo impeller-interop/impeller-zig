@@ -35,17 +35,11 @@ pub fn build(b: *std.Build) void {
     };
 
     const sdk = getSdk(b, options);
-    exposeSdk(b, sdk);
+    b.addNamedLazyPath("impeller_library", sdk.runtime_library);
 
     const mod = addModule(b, options, sdk);
-    addTests(b, options, sdk, mod);
-}
 
-/// Link the Impeller runtime to a final compile step.
-pub fn linkRuntime(compile_step: *std.Build.Step.Compile, dep: *std.Build.Dependency) void {
-    const target = compile_step.rootModuleTarget();
-    const sdk = SdkPaths.fromDependency(dep, target);
-    linkSdk(compile_step.root_module, sdk, target);
+    addTests(b, options, sdk, mod);
 }
 
 /// Install the Impeller runtime to a selected install directory.
@@ -57,7 +51,7 @@ pub fn installRuntime(options: struct {
     const compile_step = options.compile_step;
     const b = compile_step.step.owner;
     const target = compile_step.rootModuleTarget();
-    const sdk = SdkPaths.fromDependency(options.dependency, target);
+    const runtime_library = options.dependency.namedLazyPath("impeller_library");
 
     const runtime_file_name = switch (target.os.tag) {
         .windows => "impeller.dll",
@@ -67,7 +61,7 @@ pub fn installRuntime(options: struct {
     };
 
     return &b.addInstallFileWithDir(
-        sdk.runtime_library,
+        runtime_library,
         options.install_dir,
         runtime_file_name,
     ).step;
@@ -81,19 +75,9 @@ fn getSdk(b: *std.Build, options: BuildOptions) SdkPaths {
     return .fromDependency(dep, options.target.result);
 }
 
-fn exposeSdk(b: *std.Build, sdk: SdkPaths) void {
-    b.addNamedLazyPath("impeller_header", sdk.header);
-    b.addNamedLazyPath("impeller_include", sdk.include_path);
-    b.addNamedLazyPath("impeller_lib_dir", sdk.lib_path);
-    b.addNamedLazyPath("impeller_library", sdk.runtime_library);
-    if (sdk.windows_import_library) |import_library| {
-        b.addNamedLazyPath("impeller_import_library", import_library);
-    }
-}
-
 fn addModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.Module {
-    const impeller_c = addRawModule(b, options, sdk);
-    return b.addModule("impeller", .{
+    const impeller_c = addCModule(b, options, sdk);
+    const mod = b.addModule("impeller", .{
         .root_source_file = b.path("src/impeller.zig"),
         .target = options.target,
         .optimize = options.optimize,
@@ -101,9 +85,13 @@ fn addModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.Mod
             .{ .name = "impeller_c", .module = impeller_c },
         },
     });
+
+    linkSdk(mod, sdk, options.target.result);
+
+    return mod;
 }
 
-fn addRawModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.Module {
+fn addCModule(b: *std.Build, options: BuildOptions, sdk: SdkPaths) *std.Build.Module {
     const translate_c = b.addTranslateC(.{
         .root_source_file = sdk.header,
         .target = options.target,
@@ -121,8 +109,8 @@ fn addTests(b: *std.Build, options: BuildOptions, sdk: SdkPaths, mod: *std.Build
     if (test_filter) |spec| {
         var list: std.ArrayList([]const u8) = .empty;
         var parts = std.mem.splitScalar(u8, spec, ',');
-        while (parts.next()) |part| list.append(b.allocator, part) catch @panic("OOM");
-        filters = list.toOwnedSlice(b.allocator) catch @panic("OOM");
+        while (parts.next()) |part| list.append(b.allocator, part) catch @panic("out of memory");
+        filters = list.toOwnedSlice(b.allocator) catch @panic("out of memory");
     }
 
     const test_mod = b.createModule(.{
@@ -138,10 +126,14 @@ fn addTests(b: *std.Build, options: BuildOptions, sdk: SdkPaths, mod: *std.Build
         .root_module = test_mod,
         .filters = filters,
     });
-    linkSdk(tests.root_module, sdk, options.target.result);
 
     const run_tests = b.addRunArtifact(tests);
-    addRuntimePath(run_tests, sdk, options.target.result);
+
+    if (options.target.result.os.tag == .windows) {
+        run_tests.setCwd(sdk.lib_path);
+    } else {
+        tests.root_module.addRPath(sdk.lib_path);
+    }
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_tests.step);
@@ -158,38 +150,4 @@ fn linkSdk(mod: *std.Build.Module, sdk: SdkPaths, target: std.Target) void {
     } else {
         mod.addObjectFile(sdk.runtime_library);
     }
-}
-
-fn addRuntimePath(run: *std.Build.Step.Run, sdk: SdkPaths, target: std.Target) void {
-    const b = run.step.owner;
-    const lib_path = lazyPathString(sdk.lib_path);
-
-    switch (target.os.tag) {
-        .macos => run.setEnvironmentVariable("DYLD_LIBRARY_PATH", lib_path),
-        .windows => {
-            const old_path = run.getEnvMap().get("PATH");
-            if (old_path) |prev_path| {
-                run.setEnvironmentVariable("PATH", b.fmt("{s}{c}{s}", .{ prev_path, std.fs.path.delimiter, lib_path }));
-            } else {
-                run.setEnvironmentVariable("PATH", lib_path);
-            }
-        },
-        .linux => run.setEnvironmentVariable("LD_LIBRARY_PATH", lib_path),
-        else => @panic("unsupported Impeller SDK target"),
-    }
-}
-
-fn lazyPathString(lazy_path: std.Build.LazyPath) []const u8 {
-    return switch (lazy_path) {
-        .cwd_relative => |path| path,
-        .src_path => |src_path| src_path.owner.root.joinString(
-            src_path.owner.allocator,
-            src_path.sub_path,
-        ) catch @panic("OOM"),
-        .dependency => |dep| dep.dependency.builder.root.joinString(
-            dep.dependency.builder.allocator,
-            dep.sub_path,
-        ) catch @panic("OOM"),
-        .generated, .relative => @panic("expected a file system path"),
-    };
 }
