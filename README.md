@@ -36,6 +36,14 @@ Requires Zig `0.17.0` or newer, including Zig `master`.
 
 ## Install
 
+Pin the current release:
+
+```bash
+zig fetch --save git+https://github.com/impeller-interop/impeller-zig#v0.4.0
+```
+
+Or track `main`, which follows the latest Impeller SDK pin:
+
 ```bash
 zig fetch --save git+https://github.com/impeller-interop/impeller-zig#main
 ```
