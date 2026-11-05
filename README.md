@@ -30,9 +30,9 @@ Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/imp
 
 ## Zig support
 
-Requires Zig `0.17.0` or newer, including Zig `master`.
+Requires Zig `0.17.1` or newer, including Zig `master`.
 
-[![Zig version support](https://zig-support.dkx215417.workers.dev/master/0.17.0/badge.svg)](https://ziglang.org/download/)
+[![Zig version support](https://zig-support.dkx215417.workers.dev/master/0.17.1/badge.svg)](https://ziglang.org/download/)
 
 ## Install
 
