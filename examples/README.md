@@ -12,7 +12,7 @@ backends/
     main.zig          — dispatch
     draw.zig          — shared scene
     metal.m           — shared macOS bridge
-    NotoSans.ttf
+    noto-mini.ttf
     backends/
       glfw.zig
       sdl3.zig

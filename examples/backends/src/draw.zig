@@ -1,6 +1,6 @@
 const std = @import("std");
 const impeller = @import("impeller");
-const font_bytes = @embedFile("NotoSans.ttf");
+const font_bytes = @embedFile("noto-mini.ttf");
 
 pub const canvas_width = 800;
 pub const canvas_height = 600;
