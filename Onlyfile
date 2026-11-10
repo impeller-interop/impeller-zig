@@ -30,6 +30,12 @@ run-sdl3(args..):
     | cd examples/backends
     | zig build run-sdl3 {{args}}
 
+[help] Run the planet shader example
+[fail] Planet example run failed.
+run-planet(args..):
+    | cd examples/shaders
+    | zig build run-planet {{args}}
+
 [help] Run the liquid glass shader example
 [fail] Liquid glass example run failed.
 run-liquid-glass(args..):
