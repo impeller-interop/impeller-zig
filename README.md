@@ -17,7 +17,7 @@ Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/imp
 </p>
 
 <p align="center">
-  <strong><a href="https://github.com/impeller-interop/impeller-zig-examples">Explore runnable examples →</a></strong>
+  <strong><a href="examples/">Explore runnable examples →</a></strong>
 </p>
 
 ## Features
@@ -139,7 +139,7 @@ try surface.present();
 
 ## Examples
 
-Runnable examples live in [`impeller-zig-examples`](https://github.com/impeller-interop/impeller-zig-examples), keeping this package a pure library dependency with no windowing requirement.
+Runnable examples live in [`examples/`](examples/), split into the independent `backends` and `shaders` projects. The library itself stays a pure dependency with no windowing requirement.
 
 ## API notes
 

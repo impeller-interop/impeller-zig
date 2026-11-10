@@ -14,25 +14,51 @@ consumer():
     | cd tests/consumer
     | zig build run
 
+[help] Run the GLFW backend example
+[fail] GLFW example run failed.
+run-glfw(args..):
+    | cd examples/backends
+    | zig build run-glfw {{args}}
+
+[help] Run the wio backend example
+[fail] wio example run failed.
+run-wio(args..):
+    | cd examples/backends
+    | zig build run-wio {{args}}
+
+[help] Run the SDL3 backend example
+[fail] SDL3 example run failed.
+run-sdl3(args..):
+    | cd examples/backends
+    | zig build run-sdl3 {{args}}
+
+[help] Run the liquid glass shader example
+[fail] Liquid glass example run failed.
+run-liquid-glass(args..):
+    | cd examples/shaders
+    | zig build run-liquid-glass {{args}}
+
 [help] Format
 [pass] Formatting complete.
 [fail] Formatting failed.
 fmt():
     zig fmt src tests build.zig build.zig.zon
 
-[help] Check Formatting
-[pass] Formatting is clean.
-[fail] Formatting failed.
-fmt-check():
-    zig fmt --check src tests build.zig build.zig.zon
-
 [help] Clean Cache and Output
-[desc] Remove every build artifact, including the consumer package caches.
-[desc] zig-pkg is recreated from the global cache; tools headers come back from the fetch scripts.
+[desc] Remove every build artifact.
 [pass] Clean complete.
 [fail] Clean failed.
 clean():
     rm -rf .zig-cache zig-out zig-pkg
-    rm -rf tests/consumer/.zig-cache tests/consumer/zig-out tests/consumer/zig-pkg
+
+    | cd tests/consumer
+    | rm -rf .zig-cache zig-out zig-pkg
+
+    | cd examples/backends
+    | rm -rf .zig-cache zig-out zig-pkg
+
+    | cd examples/shaders
+    | rm -rf .zig-cache zig-out zig-pkg
+
     rm -rf tools/__pycache__
     rm -f tools/impeller_*.h tools/*.export.md

@@ -1,0 +1,30 @@
+.{
+    .name = .impeller_backends_examples,
+    .version = "0.0.0",
+    .fingerprint = 0xb1bf84b4e12f4b7e,
+    .minimum_zig_version = "0.17.1",
+    .dependencies = .{
+        .impeller_zig = .{
+            .path = "../..",
+        },
+        .sdl3 = .{
+            .url = "git+https://codeberg.org/7Games/zig-sdl3?ref=v0.2.3#666331118c8f7d8a03ea633d79a343c34dc32b84",
+            .hash = "sdl3-0.2.3-NmT1Q1QDKgACd5t_PNSG08lcOCX25qaRYZjUmXPTVBY_",
+        },
+        .glfw = .{
+            .url = "git+https://github.com/tiawl/glfw.zig#6330b9fff9137d5478415452113cff5c7584150c",
+            .hash = "glfw_zig-1.0.0-NrvYoxInGgASaYSHqRhKAPPA9U7hMOqT3jWtrf_HxsbK",
+            .lazy = true,
+        },
+        .wio = .{
+            .url = "git+https://github.com/ypsvlq/wio?ref=master#4a9c020b6b68a072bc584c41485da7087a4c3992",
+            .hash = "wio-0.0.0-8xHrr2weCADbOTaJsscdg3tQqfr4QnPc40kk1y14qe58",
+            .lazy = true,
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
