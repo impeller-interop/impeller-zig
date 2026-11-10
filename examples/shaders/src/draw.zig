@@ -152,6 +152,11 @@ fn runVulkan(window: sdl3.video.Window) !void {
         }
         if (quit) break;
 
+        if (window.getFlags().minimized) {
+            sdl3.timer.delayMilliseconds(10);
+            continue;
+        }
+
         var width: c_int = 0;
         var height: c_int = 0;
         _ = sdl3.c.SDL_GetWindowSizeInPixels(window.value, &width, &height);
@@ -194,6 +199,11 @@ fn runMetal(window: sdl3.video.Window) !void {
             }
         }
         if (quit) break;
+
+        if (window.getFlags().minimized) {
+            sdl3.timer.delayMilliseconds(10);
+            continue;
+        }
 
         var width: c_int = 0;
         var height: c_int = 0;
