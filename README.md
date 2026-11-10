@@ -13,7 +13,7 @@ Standalone SDK artifacts are packaged in [`impeller-sdk`](https://github.com/imp
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/883936cf-6c3b-40b6-a34a-0d6c7388b7cc" width="60%" />
+  <img src="https://github.com/user-attachments/assets/42a9e05c-4088-4a76-a295-74619eb8ecfe" width="60%" />
 </p>
 
 <p align="center">
