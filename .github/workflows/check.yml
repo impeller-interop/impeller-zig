@@ -52,10 +52,8 @@ jobs:
       - name: Run tests
         run: zig build test
 
-      - name: Check consumer package contract
-        working-directory: tests/consumer
-        shell: bash
-        run: zig build run
+      - name: Run smoke test
+        run: zig build run-smoke
 
   required:
     name: Build and test

@@ -6,13 +6,11 @@
 test():
     zig build test
 
-[help] Check Consumer Package Contract
-[desc] Build and run consumer against the installed runtime.
-[pass] Consumer contract holds.
-[fail] Consumer contract failed.
-consumer():
-    | cd tests/consumer
-    | zig build run
+[help] Run Smoke Test
+[pass] Smoke test passed.
+[fail] Smoke test failed.
+smoke():
+    zig build run-smoke
 
 [help] Run the GLFW backend example
 [fail] GLFW example run failed.
@@ -50,9 +48,6 @@ fmt():
 [fail] Clean failed.
 clean():
     rm -rf .zig-cache zig-out zig-pkg
-
-    | cd tests/consumer
-    | rm -rf .zig-cache zig-out zig-pkg
 
     | cd examples/backends
     | rm -rf .zig-cache zig-out zig-pkg

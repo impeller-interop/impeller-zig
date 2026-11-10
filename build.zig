@@ -6,6 +6,7 @@ const BuildOptions = struct {
 };
 
 const SdkPaths = struct {
+    dependency: *std.Build.Dependency,
     header: std.Build.LazyPath,
     include_path: std.Build.LazyPath,
     lib_path: std.Build.LazyPath,
@@ -14,6 +15,7 @@ const SdkPaths = struct {
 
     fn fromDependency(dep: *std.Build.Dependency, target: std.Target) SdkPaths {
         return .{
+            .dependency = dep,
             .header = dep.namedLazyPath("impeller_header"),
             .include_path = dep.namedLazyPath("impeller_include"),
             .lib_path = dep.namedLazyPath("impeller_lib_dir"),
@@ -40,6 +42,7 @@ pub fn build(b: *std.Build) void {
     const mod = addModule(b, options, sdk);
 
     addTests(b, options, sdk, mod);
+    addSmoke(b, options, sdk, mod);
 }
 
 /// Install the Impeller runtime to a selected install directory.
@@ -141,6 +144,46 @@ fn addTests(b: *std.Build, options: BuildOptions, sdk: SdkPaths, mod: *std.Build
     const install_tests = b.addInstallArtifact(tests, .{});
     const test_exe_step = b.step("test-exe", "Install the unit test binary");
     test_exe_step.dependOn(&install_tests.step);
+}
+
+fn addSmoke(b: *std.Build, options: BuildOptions, sdk: SdkPaths, mod: *std.Build.Module) void {
+    const smoke_mod = b.createModule(.{
+        .root_source_file = b.path("tests/smoke.zig"),
+        .target = options.target,
+        .optimize = options.optimize,
+        .imports = &.{
+            .{ .name = "impeller", .module = mod },
+        },
+    });
+
+    const smoke = b.addExecutable(.{
+        .name = "smoke",
+        .root_module = smoke_mod,
+    });
+    smoke.root_module.addRPathSpecial(switch (options.target.result.os.tag) {
+        .macos => "@executable_path",
+        else => "$ORIGIN",
+    });
+
+    const install_runtime = installRuntime(.{
+        .compile_step = smoke,
+        .dependency = sdk.dependency,
+    });
+    const install_smoke = b.addInstallArtifact(smoke, .{});
+    install_smoke.step.dependOn(install_runtime);
+
+    const smoke_step = b.step("smoke", "Build the smoke test");
+    smoke_step.dependOn(&install_smoke.step);
+
+    const smoke_path = if (options.target.result.os.tag == .windows)
+        "zig-out/bin/smoke.exe"
+    else
+        "zig-out/bin/smoke";
+    const run_smoke = b.addRunFile(b.path(smoke_path));
+    run_smoke.step.dependOn(&install_smoke.step);
+
+    const run_smoke_step = b.step("run-smoke", "Run the smoke test");
+    run_smoke_step.dependOn(&run_smoke.step);
 }
 
 fn linkSdk(mod: *std.Build.Module, sdk: SdkPaths, target: std.Target) void {
